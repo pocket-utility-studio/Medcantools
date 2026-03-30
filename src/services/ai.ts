@@ -37,6 +37,8 @@ export interface EnrichedStrain {
 
 const RECOMMENDER_SYSTEM = `You are a concise cannabis advisor. Recommend one strain from the user's stash. Be direct — no filler, no repetition between sections. Never repeat the strain name or any fact already stated.
 
+The user's time of day will be provided. Let it shape your recommendation — avoid high-THC strains in the morning unless the user explicitly needs strong relief, favour lighter/sativa-leaning options early in the day, and lean towards indica/relaxing strains in the evening and night. If the user's request conflicts with the time of day (e.g. wants sleep but it's morning), acknowledge it briefly in RECOMMENDATION only.
+
 Use exactly these section headers, each followed immediately by content:
 
 RECOMMENDATION
@@ -64,6 +66,7 @@ export interface ConsultationFeedback {
 export async function getRecommendation(
   desiredEffect: string,
   party: EnrichedStrain[],
+  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night',
   feedbackHistory?: ConsultationFeedback[],
   patientNotes?: string,
   onChunk?: (chunk: string) => void,
@@ -103,7 +106,7 @@ export async function getRecommendation(
       `\n\nUse past session notes to personalise your recommendation.`
     : ''
 
-  const prompt = `My stash:\n${partyList}${notesBlock}${memoryBlock}\n\nWhat I want: ${desiredEffect}`
+  const prompt = `Time of day: ${timeOfDay}\n\nMy stash:\n${partyList}${notesBlock}${memoryBlock}\n\nWhat I want: ${desiredEffect}`
 
   if (onChunk) {
     const stream = await model.generateContentStream(prompt)

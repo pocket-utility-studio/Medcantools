@@ -14,6 +14,22 @@ const EFFECT_TAGS = [
 ]
 
 type Status = 'idle' | 'loading' | 'done' | 'error'
+type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
+
+function detectTimeOfDay(): TimeOfDay {
+  const h = new Date().getHours()
+  if (h >= 5  && h < 12) return 'morning'
+  if (h >= 12 && h < 17) return 'afternoon'
+  if (h >= 17 && h < 21) return 'evening'
+  return 'night'
+}
+
+const TIME_LABELS: Record<TimeOfDay, string> = {
+  morning:   'Morning',
+  afternoon: 'Afternoon',
+  evening:   'Evening',
+  night:     'Night',
+}
 
 export default function Recommender() {
   const { strains } = useStash()
@@ -21,6 +37,7 @@ export default function Recommender() {
 
   const [selected, setSelected] = useState<string[]>([])
   const [freeText, setFreeText] = useState('')
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(detectTimeOfDay)
   const [status, setStatus] = useState<Status>('idle')
   const [response, setResponse] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -50,7 +67,7 @@ export default function Recommender() {
     }))
 
     try {
-      await getRecommendation(query, party, undefined, undefined, (chunk) => {
+      await getRecommendation(query, party, timeOfDay, undefined, undefined, (chunk) => {
         setResponse(chunk)
         setStatus('done')
       })
@@ -103,6 +120,33 @@ export default function Recommender() {
                 </button>
               )
             })}
+          </div>
+
+          {/* Time of day */}
+          <div style={{ marginBottom: 20 }}>
+            <p style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 10px' }}>
+              Time of day
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {(Object.keys(TIME_LABELS) as TimeOfDay[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTimeOfDay(t)}
+                  style={{
+                    flex: 1,
+                    background: timeOfDay === t ? 'var(--accent-dim)' : 'var(--surface)',
+                    border: `1px solid ${timeOfDay === t ? 'var(--accent)' : 'var(--border)'}`,
+                    borderRadius: 6,
+                    color: timeOfDay === t ? 'var(--text)' : 'var(--text-muted)',
+                    fontSize: 12,
+                    minHeight: 44,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {TIME_LABELS[t]}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Free text */}
