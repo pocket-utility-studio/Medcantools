@@ -132,7 +132,7 @@ function Home() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Medcantools">
       <div style={{
         display: 'flex',
         flexDirection: 'column',
