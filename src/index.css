@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #0d0f0c;
+    --surface: #161a14;
+    --border: #252b21;
+    --accent: #5a8a3a;
+    --accent-dim: #3d6028;
+    --text: #e8ede4;
+    --text-muted: #6b7a62;
+    --text-dim: #3d4a36;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
