@@ -15,7 +15,7 @@ export default function Guide() {
   return (
     <div style={{ padding: '20px 16px 40px' }}>
       <PageHeader title="Guides" onBack={() => navigate('/')} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {GUIDES.map(({ to, label, desc, Icon }) => (
           <button
             key={to}
@@ -24,33 +24,35 @@ export default function Guide() {
               display: 'flex',
               alignItems: 'center',
               background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              border: '2px solid var(--border)',
               borderRadius: 12,
+              boxShadow: 'var(--shadow-sm)',
               padding: '0 16px',
               width: '100%',
               textAlign: 'left',
               cursor: 'pointer',
-              minHeight: 66,
+              minHeight: 68,
               gap: 14,
             }}
           >
             <div style={{
               width: 38,
               height: 38,
-              borderRadius: 9,
-              background: 'var(--accent-glow)',
+              borderRadius: 8,
+              border: '2px solid var(--border)',
+              background: 'var(--accent-dim)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              <Icon size={17} color="var(--accent)" strokeWidth={1.75} />
+              <Icon size={17} color="var(--accent)" strokeWidth={2} />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>{label}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{label}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{desc}</div>
             </div>
-            <ChevronRight size={15} color="var(--text-dim)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+            <ChevronRight size={15} color="var(--text-muted)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
           </button>
         ))}
       </div>

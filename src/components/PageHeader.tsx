@@ -14,14 +14,14 @@ export default function PageHeader({ title, onBack, right }: PageHeaderProps) {
       justifyContent: 'space-between',
       marginBottom: 24,
       paddingBottom: 16,
-      borderBottom: '1px solid var(--border)',
+      borderBottom: '2px solid var(--border)',
     }}>
       <button
         onClick={onBack}
         style={{
           background: 'none',
           border: 'none',
-          color: 'var(--text-muted)',
+          color: 'var(--text)',
           cursor: 'pointer',
           padding: 0,
           minHeight: 44,
@@ -32,17 +32,17 @@ export default function PageHeader({ title, onBack, right }: PageHeaderProps) {
           marginLeft: -6,
         }}
       >
-        <ChevronLeft size={22} strokeWidth={2} />
+        <ChevronLeft size={24} strokeWidth={2.5} />
       </button>
 
       <h2 style={{
-        fontSize: 16,
-        fontWeight: 600,
+        fontFamily: "'Caveat', cursive",
+        fontSize: 24,
+        fontWeight: 700,
         margin: 0,
         color: 'var(--text)',
         flex: 1,
         textAlign: 'center',
-        letterSpacing: '0.01em',
       }}>
         {title}
       </h2>

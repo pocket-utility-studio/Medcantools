@@ -12,10 +12,10 @@ import LawGuide from './pages/LawGuide'
 import SettingsPage from './pages/Settings'
 
 const HUB_CARDS = [
-  { to: '/journal',   label: 'My Journal',    desc: '',                                  Icon: BookOpen },
+  { to: '/journal',   label: 'My Journal',    desc: '',                                   Icon: BookOpen },
   { to: '/recommend', label: 'Get AI Advice', desc: 'Personalised strain recommendation', Icon: Sparkles },
-  { to: '/sessions',  label: 'Sessions',      desc: 'Log and review your usage',          Icon: ClipboardList },
-  { to: '/guide',     label: 'Guides',        desc: 'Temperature, AVB, calm down, law',   Icon: Compass },
+  { to: '/sessions',  label: 'Sessions',      desc: 'Log and review your usage',           Icon: ClipboardList },
+  { to: '/guide',     label: 'Guides',        desc: 'Temperature, AVB, calm down, law',    Icon: Compass },
 ]
 
 function Home() {
@@ -37,20 +37,20 @@ function Home() {
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        padding: '28px 16px 0',
+        padding: '32px 16px 0',
       }}>
         <div style={{ textAlign: 'center' }}>
           <h1 style={{
-            fontSize: 18,
+            fontFamily: "'Caveat', cursive",
+            fontSize: 36,
             fontWeight: 700,
-            letterSpacing: '0.12em',
-            margin: '0 0 8px',
+            letterSpacing: '0.04em',
+            margin: '0 0 6px',
             color: 'var(--text)',
-            textTransform: 'uppercase',
           }}>
             Effect Locator
           </h1>
-          <div style={{ width: 28, height: 2, background: 'var(--accent)', borderRadius: 2, margin: '0 auto' }} />
+          <div style={{ width: 40, height: 3, background: 'var(--accent)', margin: '0 auto' }} />
         </div>
 
         <button
@@ -60,7 +60,7 @@ function Home() {
             right: 8,
             background: 'none',
             border: 'none',
-            color: 'var(--text-dim)',
+            color: 'var(--text-muted)',
             cursor: 'pointer',
             minHeight: 44,
             minWidth: 44,
@@ -69,7 +69,7 @@ function Home() {
             justifyContent: 'center',
           }}
         >
-          <Settings size={19} strokeWidth={1.75} />
+          <Settings size={20} strokeWidth={2} />
         </button>
       </div>
 
@@ -78,7 +78,7 @@ function Home() {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        gap: 10,
+        gap: 12,
         padding: '28px 16px 32px',
       }}>
         {cards.map(({ to, label, desc, Icon }) => (
@@ -90,8 +90,9 @@ function Home() {
               display: 'flex',
               alignItems: 'center',
               background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 14,
+              border: '2px solid var(--border)',
+              borderRadius: 12,
+              boxShadow: 'var(--shadow)',
               padding: '0 16px',
               width: '100%',
               textAlign: 'left',
@@ -103,18 +104,19 @@ function Home() {
             <div style={{
               width: 40,
               height: 40,
-              borderRadius: 10,
-              background: 'var(--accent-glow)',
+              borderRadius: 8,
+              border: '2px solid var(--border)',
+              background: 'var(--accent-dim)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              <Icon size={19} color="var(--accent)" strokeWidth={1.75} />
+              <Icon size={18} color="var(--accent)" strokeWidth={2} />
             </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>
                 {label}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
@@ -122,7 +124,7 @@ function Home() {
               </div>
             </div>
 
-            <ChevronRight size={16} color="var(--text-dim)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+            <ChevronRight size={16} color="var(--text-muted)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
           </button>
         ))}
       </div>

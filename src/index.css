@@ -2,15 +2,17 @@
 
 @layer base {
   :root {
-    --bg: #111111;
-    --surface: #1e1e1e;
-    --border: #2a2a2a;
+    --bg: #f2f0eb;
+    --surface: #ffffff;
+    --border: #1a1a1a;
     --accent: #3b7651;
-    --accent-dim: #2a5a3c;
+    --accent-dim: #e4f0e8;
     --accent-glow: rgba(59, 118, 81, 0.12);
-    --text: #f0f0f0;
-    --text-muted: #888888;
-    --text-dim: #444444;
+    --text: #111111;
+    --text-muted: #666666;
+    --text-dim: #bbbbbb;
+    --shadow: 3px 3px 0px #1a1a1a;
+    --shadow-sm: 2px 2px 0px #1a1a1a;
   }
 
   * {
@@ -33,11 +35,12 @@
     min-height: 44px;
     display: inline-flex;
     align-items: center;
-    transition: opacity 0.1s ease;
+    transition: opacity 0.1s ease, transform 0.1s ease;
   }
 
   button:active {
-    opacity: 0.65;
+    opacity: 0.75;
+    transform: translate(1px, 1px);
   }
 
   a {
@@ -48,5 +51,9 @@
 
   textarea, input {
     font-family: inherit;
+  }
+
+  input[type="range"] {
+    accent-color: var(--accent);
   }
 }

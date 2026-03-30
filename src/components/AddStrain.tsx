@@ -101,7 +101,7 @@ export default function AddStrain({ onClose }: Props) {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     background: 'var(--surface)',
-    border: '1px solid var(--border)',
+    border: '2px solid var(--border)',
     borderRadius: 10,
     color: 'var(--text)',
     fontSize: 15,
@@ -139,7 +139,7 @@ export default function AddStrain({ onClose }: Props) {
           style={{
             width: '100%',
             background: 'var(--surface)',
-            border: `1px dashed ${scanning ? 'var(--accent)' : 'var(--border)'}`,
+            border: `2px dashed ${scanning ? 'var(--accent)' : 'var(--border)'}`,
             borderRadius: 14,
             color: scanning ? 'var(--accent)' : 'var(--text-muted)',
             cursor: scanning ? 'default' : 'pointer',
@@ -200,7 +200,7 @@ export default function AddStrain({ onClose }: Props) {
       {/* Error */}
       {error && (
         <div style={{
-          background: 'rgba(224, 85, 85, 0.08)', border: '1px solid rgba(224, 85, 85, 0.3)',
+          background: '#fff5f5', border: '2px solid #e05555',
           borderRadius: 10, padding: '10px 14px', marginBottom: 16,
         }}>
           <p style={{ fontSize: 13, color: '#e05555', margin: 0 }}>{error}</p>
@@ -265,7 +265,7 @@ export default function AddStrain({ onClose }: Props) {
               style={{
                 flex: 1,
                 background: type === t ? 'var(--accent-dim)' : 'var(--surface)',
-                border: `1px solid ${type === t ? 'var(--accent)' : 'var(--border)'}`,
+                border: `2px solid ${type === t ? 'var(--accent)' : 'var(--border)'}`,
                 borderRadius: 10,
                 color: type === t ? 'var(--text)' : 'var(--text-muted)',
                 fontSize: 13,
@@ -302,7 +302,7 @@ export default function AddStrain({ onClose }: Props) {
       {/* In stock toggle */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'var(--surface)', border: '1px solid var(--border)',
+        background: 'var(--surface)', border: '2px solid var(--border)',
         borderRadius: 10, padding: '12px 16px', marginBottom: 24,
       }}>
         <span style={{ fontSize: 14, color: 'var(--text)' }}>In stock</span>

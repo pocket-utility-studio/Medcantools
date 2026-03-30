@@ -83,10 +83,10 @@ export default function Recommender() {
   }
 
   const sectionLabel: React.CSSProperties = {
-    fontSize: 11,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
-    color: 'var(--text-muted)',
+    fontFamily: "'Caveat', cursive",
+    fontSize: 18,
+    fontWeight: 700,
+    color: 'var(--text)',
     margin: '0 0 10px',
     display: 'block',
   }
@@ -97,8 +97,12 @@ export default function Recommender() {
 
       {inStock.length === 0 ? (
         <div style={{
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderRadius: 12, padding: '24px 20px', textAlign: 'center',
+          background: 'var(--surface)',
+          border: '2px solid var(--border)',
+          borderRadius: 12,
+          boxShadow: 'var(--shadow)',
+          padding: '24px 20px',
+          textAlign: 'center',
         }}>
           <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>
             Add strains to your journal first, then come back for a recommendation.
@@ -107,7 +111,7 @@ export default function Recommender() {
       ) : (
         <>
           {/* Effect tags */}
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: 22 }}>
             <span style={sectionLabel}>How do you want to feel?</span>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {EFFECT_TAGS.map((tag) => {
@@ -117,12 +121,12 @@ export default function Recommender() {
                     key={tag}
                     onClick={() => toggleTag(tag)}
                     style={{
-                      background: active ? 'var(--accent-dim)' : 'var(--surface)',
-                      border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                      background: active ? 'var(--border)' : 'var(--surface)',
+                      border: '2px solid var(--border)',
                       borderRadius: 22,
-                      color: active ? 'var(--text)' : 'var(--text-muted)',
+                      color: active ? '#ffffff' : 'var(--text)',
                       fontSize: 13,
-                      fontWeight: active ? 500 : 400,
+                      fontWeight: active ? 600 : 400,
                       padding: '0 16px',
                       height: 44,
                       minHeight: 44,
@@ -137,15 +141,15 @@ export default function Recommender() {
           </div>
 
           {/* Severity */}
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: 22 }}>
             <span style={sectionLabel}>Symptom severity</span>
             <div style={{
               display: 'flex',
               background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              border: '2px solid var(--border)',
               borderRadius: 10,
-              padding: 4,
-              gap: 4,
+              padding: 3,
+              gap: 3,
             }}>
               {SEVERITY_OPTIONS.map(({ value, label }) => {
                 const active = severity === value
@@ -155,15 +159,14 @@ export default function Recommender() {
                     onClick={() => setSeverity(value)}
                     style={{
                       flex: 1,
-                      background: active ? 'var(--accent)' : 'none',
+                      background: active ? 'var(--border)' : 'none',
                       border: 'none',
                       borderRadius: 7,
                       color: active ? '#fff' : 'var(--text-muted)',
                       fontSize: 13,
-                      fontWeight: active ? 600 : 400,
+                      fontWeight: active ? 700 : 400,
                       minHeight: 40,
                       cursor: 'pointer',
-                      transition: 'background 0.15s, color 0.15s',
                     }}
                   >
                     {label}
@@ -171,7 +174,7 @@ export default function Recommender() {
                 )
               })}
             </div>
-            <p style={{ fontSize: 12, color: 'var(--text-dim)', margin: '7px 0 0', lineHeight: 1.5 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '7px 0 0', lineHeight: 1.5 }}>
               {SEVERITY_DESC[severity]}
             </p>
           </div>
@@ -187,7 +190,7 @@ export default function Recommender() {
               style={{
                 width: '100%',
                 background: 'var(--surface)',
-                border: '1px solid var(--border)',
+                border: '2px solid var(--border)',
                 borderRadius: 10,
                 color: 'var(--text)',
                 fontSize: 14,
@@ -205,12 +208,13 @@ export default function Recommender() {
             disabled={!query || status === 'loading'}
             style={{
               width: '100%',
-              background: query && status !== 'loading' ? 'var(--accent)' : 'var(--border)',
-              border: 'none',
+              background: query && status !== 'loading' ? 'var(--accent)' : 'var(--text-dim)',
+              border: '2px solid ' + (query && status !== 'loading' ? 'var(--accent)' : 'var(--text-dim)'),
+              boxShadow: query && status !== 'loading' ? 'var(--shadow)' : 'none',
               borderRadius: 12,
               color: '#fff',
               fontSize: 15,
-              fontWeight: 600,
+              fontWeight: 700,
               minHeight: 54,
               cursor: query && status !== 'loading' ? 'pointer' : 'default',
               marginBottom: 28,
@@ -231,13 +235,14 @@ export default function Recommender() {
           {/* Error */}
           {status === 'error' && (
             <div style={{
-              background: 'rgba(224, 85, 85, 0.08)',
-              border: '1px solid rgba(224, 85, 85, 0.3)',
+              background: '#fff5f5',
+              border: '2px solid #e05555',
               borderRadius: 10,
+              boxShadow: '2px 2px 0 #e05555',
               padding: '12px 16px',
               marginBottom: 16,
             }}>
-              <p style={{ fontSize: 14, color: '#e05555', margin: 0 }}>{errorMsg}</p>
+              <p style={{ fontSize: 14, color: '#c03333', margin: 0, fontWeight: 500 }}>{errorMsg}</p>
             </div>
           )}
 
@@ -256,7 +261,7 @@ function LoadingDots() {
     <span style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
       <style>{`
         @keyframes canopy-dot {
-          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
           40% { transform: translateY(-5px); opacity: 1; }
         }
       `}</style>
@@ -275,17 +280,17 @@ const SECTIONS = ['RECOMMENDATION', 'TERPENES', 'TEMPERATURE', 'HISTORY', 'EXPEC
 
 const SECTION_META: Record<string, { icon: React.ReactNode; label: string }> = {
   RECOMMENDATION: { icon: <Sparkles size={12} strokeWidth={2} />, label: 'Recommendation' },
-  TERPENES:       { icon: <Leaf size={12} strokeWidth={2} />,     label: 'Terpenes' },
+  TERPENES:       { icon: <Leaf size={12} strokeWidth={2} />,        label: 'Terpenes' },
   TEMPERATURE:    { icon: <Thermometer size={12} strokeWidth={2} />, label: 'Temperature' },
-  HISTORY:        { icon: <BookOpen size={12} strokeWidth={2} />, label: 'History' },
-  EXPECT:         { icon: <Eye size={12} strokeWidth={2} />,      label: 'What to expect' },
+  HISTORY:        { icon: <BookOpen size={12} strokeWidth={2} />,    label: 'History' },
+  EXPECT:         { icon: <Eye size={12} strokeWidth={2} />,         label: 'What to expect' },
 }
 
 function ResponseDisplay({ text }: { text: string }) {
   const blocks = parseResponse(text)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {blocks.map((block, i) => {
         const meta = SECTION_META[block.heading]
         const isMain = block.heading === 'RECOMMENDATION'
@@ -293,30 +298,34 @@ function ResponseDisplay({ text }: { text: string }) {
           <div
             key={i}
             style={{
-              background: isMain ? 'rgba(59, 118, 81, 0.07)' : 'var(--surface)',
-              border: `1px solid ${isMain ? 'rgba(59, 118, 81, 0.3)' : 'var(--border)'}`,
+              background: isMain ? 'var(--accent-dim)' : 'var(--surface)',
+              border: `2px solid ${isMain ? 'var(--accent)' : 'var(--border)'}`,
               borderRadius: 12,
+              boxShadow: isMain ? `3px 3px 0 var(--accent)` : 'var(--shadow-sm)',
               padding: '14px 16px',
             }}
           >
             <div style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              color: 'var(--accent)', marginBottom: 8,
+              color: isMain ? 'var(--accent)' : 'var(--text-muted)',
+              marginBottom: 8,
             }}>
               {meta?.icon}
               <span style={{
-                fontSize: 10, letterSpacing: '0.1em',
-                textTransform: 'uppercase', fontWeight: 700,
+                fontFamily: "'Caveat', cursive",
+                fontSize: 14,
+                fontWeight: 700,
+                letterSpacing: '0.04em',
               }}>
                 {meta?.label ?? block.heading}
               </span>
             </div>
             <p style={{
               fontSize: isMain ? 15 : 13,
-              color: isMain ? 'var(--text)' : 'var(--text-muted)',
+              color: 'var(--text)',
               lineHeight: 1.65,
               margin: 0,
-              fontWeight: isMain ? 500 : 400,
+              fontWeight: isMain ? 600 : 400,
             }}>
               {block.body}
             </p>
