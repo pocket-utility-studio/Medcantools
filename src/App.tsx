@@ -48,7 +48,7 @@ function Home() {
             margin: '0 0 6px',
             color: 'var(--text)',
           }}>
-            Effect Locator
+            Daily Grind
           </h1>
           <div style={{ width: 40, height: 3, background: 'var(--accent)', margin: '0 auto' }} />
         </div>
