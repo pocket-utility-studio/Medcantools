@@ -37,7 +37,9 @@ export interface EnrichedStrain {
 
 const RECOMMENDER_SYSTEM = `You are a concise cannabis advisor. Recommend one strain from the user's stash. Be direct — no filler, no repetition between sections. Never repeat the strain name or any fact already stated.
 
-The user's time of day will be provided. Let it shape your recommendation — avoid high-THC strains in the morning unless the user explicitly needs strong relief, favour lighter/sativa-leaning options early in the day, and lean towards indica/relaxing strains in the evening and night. If the user's request conflicts with the time of day (e.g. wants sleep but it's morning), acknowledge it briefly in RECOMMENDATION only.
+The user's time of day will be provided. Let it shape your recommendation — avoid high-THC strains in the morning, favour lighter/sativa-leaning options early in the day, and lean towards indica/relaxing strains in the evening and night.
+
+Symptom severity is provided as low, medium, or high. At low severity follow time-of-day guidance strictly. At medium severity apply time-of-day guidance but consider stronger options if they clearly suit the need. At high severity all strength options are on the table regardless of time of day — prioritise symptom relief. Do not mention severity levels in your response.
 
 Use exactly these section headers, each followed immediately by content:
 
@@ -67,6 +69,7 @@ export async function getRecommendation(
   desiredEffect: string,
   party: EnrichedStrain[],
   timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night',
+  severity: 'low' | 'medium' | 'high',
   feedbackHistory?: ConsultationFeedback[],
   patientNotes?: string,
   onChunk?: (chunk: string) => void,
@@ -106,7 +109,11 @@ export async function getRecommendation(
       `\n\nUse past session notes to personalise your recommendation.`
     : ''
 
-  const prompt = `Time of day: ${timeOfDay}\n\nMy stash:\n${partyList}${notesBlock}${memoryBlock}\n\nWhat I want: ${desiredEffect}`
+  const severityBlock =
+    severity === 'high'   ? '\nSeverity: HIGH — all strength options are on the table, prioritise symptom relief.' :
+    severity === 'medium' ? '\nSeverity: MEDIUM — consider all options but apply time-of-day judgement.' :
+                            ''
+  const prompt = `Time of day: ${timeOfDay}${severityBlock}\n\nMy stash:\n${partyList}${notesBlock}${memoryBlock}\n\nWhat I want: ${desiredEffect}`
 
   if (onChunk) {
     const stream = await model.generateContentStream(prompt)

@@ -1,14 +1,18 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import { useStash, type StrainEntry } from '../context/StashContext'
 import AddStrain from '../components/AddStrain'
 import StrainDetail from '../components/StrainDetail'
+import PageHeader from '../components/PageHeader'
 
 export default function Journal() {
+  const navigate = useNavigate()
   const { strains, loading } = useStash()
   const [adding, setAdding] = useState(false)
   const [selected, setSelected] = useState<StrainEntry | null>(null)
 
-  if (loading) return <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Loading...</p>
+  if (loading) return <p style={{ color: 'var(--text-muted)', fontSize: 14, padding: 16 }}>Loading...</p>
 
   if (adding) return <AddStrain onClose={() => setAdding(false)} />
   if (selected) return <StrainDetail strain={selected} onClose={() => setSelected(null)} />
@@ -17,29 +21,34 @@ export default function Journal() {
   const archived = strains.filter((s) => !s.inStock)
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Journal</h2>
-        <button
-          onClick={() => setAdding(true)}
-          style={{
-            background: 'var(--accent)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            padding: '0 16px',
-            height: 44,
-            fontSize: 14,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          + Add
-        </button>
-      </div>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader
+        title="My Journal"
+        onBack={() => navigate('/')}
+        right={
+          <button
+            onClick={() => setAdding(true)}
+            style={{
+              background: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              width: 44,
+              height: 44,
+              minHeight: 44,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Plus size={18} strokeWidth={2.5} />
+          </button>
+        }
+      />
 
       {strains.length === 0 && (
-        <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No strains yet. Add your first one.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 8 }}>No strains yet. Add your first one.</p>
       )}
 
       {inStock.length > 0 && (

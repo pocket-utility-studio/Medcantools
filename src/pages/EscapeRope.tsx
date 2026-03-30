@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import PageHeader from '../components/PageHeader'
 
 const SOUNDS = [
   { id: 'rain',  label: 'Rain',   gain: 0.40 },
@@ -129,6 +131,7 @@ const TECHNIQUE_STEPS: Record<string, string[]> = {
 }
 
 export default function EscapeRope() {
+  const navigate = useNavigate()
   const [selected, setSelected] = useState<string | null>(null)
   const [sound, setSound] = useState('off')
   const [breathPhase, setBreathPhase] = useState<BreathPhase>('in')
@@ -146,11 +149,8 @@ export default function EscapeRope() {
   }, [])
 
   return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px' }}>Calm down</h2>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 28px' }}>
-        Breathing, sound, and grounding techniques
-      </p>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="Calm Down" onBack={() => navigate('/guide')} />
 
       {/* Breathing box */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>

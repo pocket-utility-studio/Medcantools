@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import PageHeader from '../components/PageHeader'
 
 type Tab = 'uk' | 'es'
 
@@ -30,6 +32,7 @@ const ES_SECTIONS = [
 ]
 
 export default function LawGuide() {
+  const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('uk')
   const [expanded, setExpanded] = useState<string | null>(null)
   const [policeOpen, setPoliceOpen] = useState(false)
@@ -37,8 +40,8 @@ export default function LawGuide() {
   const sections = tab === 'uk' ? UK_SECTIONS : ES_SECTIONS
 
   return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 20px' }}>Law guide</h2>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="Law Guide" onBack={() => navigate('/guide')} />
 
       {/* Tab switcher */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>

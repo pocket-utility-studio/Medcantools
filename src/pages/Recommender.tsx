@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useStash } from '../context/StashContext'
 import { getRecommendation, type EnrichedStrain } from '../services/ai'
+import PageHeader from '../components/PageHeader'
 
 const EFFECT_TAGS = [
   'Sleep',
@@ -15,6 +17,7 @@ const EFFECT_TAGS = [
 
 type Status = 'idle' | 'loading' | 'done' | 'error'
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night'
+type Severity = 'low' | 'medium' | 'high'
 
 function detectTimeOfDay(): TimeOfDay {
   const h = new Date().getHours()
@@ -31,13 +34,21 @@ const TIME_LABELS: Record<TimeOfDay, string> = {
   night:     'Night',
 }
 
+const SEVERITY_OPTIONS: { value: Severity; label: string; desc: string }[] = [
+  { value: 'low',    label: 'Low',    desc: 'Mild — time of day respected' },
+  { value: 'medium', label: 'Medium', desc: 'Moderate — flexible approach' },
+  { value: 'high',   label: 'High',   desc: 'Severe — all options considered' },
+]
+
 export default function Recommender() {
+  const navigate = useNavigate()
   const { strains } = useStash()
   const inStock = strains.filter((s) => s.inStock)
 
   const [selected, setSelected] = useState<string[]>([])
   const [freeText, setFreeText] = useState('')
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(detectTimeOfDay)
+  const [severity, setSeverity] = useState<Severity>('low')
   const [status, setStatus] = useState<Status>('idle')
   const [response, setResponse] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -67,7 +78,7 @@ export default function Recommender() {
     }))
 
     try {
-      await getRecommendation(query, party, timeOfDay, undefined, undefined, (chunk) => {
+      await getRecommendation(query, party, timeOfDay, severity, undefined, undefined, (chunk) => {
         setResponse(chunk)
         setStatus('done')
       })
@@ -82,22 +93,27 @@ export default function Recommender() {
     }
   }
 
-  return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px' }}>Recommend</h2>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 24px' }}>
-        {inStock.length === 0
-          ? 'Add strains to your journal first.'
-          : `${inStock.length} strain${inStock.length !== 1 ? 's' : ''} in stock`}
-      </p>
+  const labelStyle: React.CSSProperties = {
+    fontSize: 11,
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    color: 'var(--text-muted)',
+    margin: '0 0 10px',
+  }
 
-      {inStock.length === 0 ? null : (
+  return (
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="Get AI Advice" onBack={() => navigate('/')} />
+
+      {inStock.length === 0 ? (
+        <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>
+          Add strains to your journal first.
+        </p>
+      ) : (
         <>
           {/* Effect tags */}
-          <p style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 10px' }}>
-            How do you want to feel?
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+          <p style={labelStyle}>How do you want to feel?</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
             {EFFECT_TAGS.map((tag) => {
               const active = selected.includes(tag)
               return (
@@ -123,10 +139,8 @@ export default function Recommender() {
           </div>
 
           {/* Time of day */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 10px' }}>
-              Time of day
-            </p>
+          <div style={{ marginBottom: 24 }}>
+            <p style={labelStyle}>Time of day</p>
             <div style={{ display: 'flex', gap: 8 }}>
               {(Object.keys(TIME_LABELS) as TimeOfDay[]).map((t) => (
                 <button
@@ -136,7 +150,7 @@ export default function Recommender() {
                     flex: 1,
                     background: timeOfDay === t ? 'var(--accent-dim)' : 'var(--surface)',
                     border: `1px solid ${timeOfDay === t ? 'var(--accent)' : 'var(--border)'}`,
-                    borderRadius: 6,
+                    borderRadius: 8,
                     color: timeOfDay === t ? 'var(--text)' : 'var(--text-muted)',
                     fontSize: 12,
                     minHeight: 44,
@@ -149,11 +163,38 @@ export default function Recommender() {
             </div>
           </div>
 
-          {/* Free text */}
-          <div style={{ marginBottom: 20 }}>
-            <p style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: '0 0 10px' }}>
-              More detail (optional)
+          {/* Symptom severity */}
+          <div style={{ marginBottom: 24 }}>
+            <p style={labelStyle}>Symptom severity</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {SEVERITY_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setSeverity(value)}
+                  style={{
+                    flex: 1,
+                    background: severity === value ? 'var(--accent-dim)' : 'var(--surface)',
+                    border: `1px solid ${severity === value ? 'var(--accent)' : 'var(--border)'}`,
+                    borderRadius: 8,
+                    color: severity === value ? 'var(--text)' : 'var(--text-muted)',
+                    fontSize: 13,
+                    fontWeight: severity === value ? 600 : 400,
+                    minHeight: 44,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--text-dim)', margin: '8px 0 0', lineHeight: 1.5 }}>
+              {SEVERITY_OPTIONS.find((o) => o.value === severity)?.desc}
             </p>
+          </div>
+
+          {/* Free text */}
+          <div style={{ marginBottom: 24 }}>
+            <p style={labelStyle}>More detail (optional)</p>
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
@@ -163,7 +204,7 @@ export default function Recommender() {
                 width: '100%',
                 background: 'var(--surface)',
                 border: '1px solid var(--border)',
-                borderRadius: 6,
+                borderRadius: 8,
                 color: 'var(--text)',
                 fontSize: 14,
                 padding: '12px',
@@ -183,7 +224,7 @@ export default function Recommender() {
               width: '100%',
               background: query && status !== 'loading' ? 'var(--accent)' : 'var(--border)',
               border: 'none',
-              borderRadius: 8,
+              borderRadius: 10,
               color: '#fff',
               fontSize: 15,
               fontWeight: 600,
@@ -216,7 +257,7 @@ function ResponseDisplay({ text }: { text: string }) {
   const blocks = parseResponse(text)
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
       {blocks.map((block, i) => (
         <div
           key={i}
@@ -262,7 +303,6 @@ function parseResponse(text: string): { heading: string; body: string }[] {
     if (body) results.push({ heading: header, body })
   }
 
-  // If parsing fails (streaming not yet at a section header), show raw
   if (results.length === 0 && text.trim()) {
     results.push({ heading: 'Response', body: text.trim() })
   }

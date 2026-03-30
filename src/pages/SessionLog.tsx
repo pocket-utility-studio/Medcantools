@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import { useStash } from '../context/StashContext'
+import PageHeader from '../components/PageHeader'
 
 interface SessionEntry {
   id: string
@@ -29,6 +32,7 @@ function saveSessions(sessions: SessionEntry[]) {
 }
 
 export default function SessionLog() {
+  const navigate = useNavigate()
   const { strains } = useStash()
   const [sessions, setSessions] = useState<SessionEntry[]>(loadSessions)
   const [adding, setAdding] = useState(false)
@@ -91,13 +95,8 @@ export default function SessionLog() {
   }
 
   if (adding) return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <button onClick={() => setAdding(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 20, cursor: 'pointer', padding: 0, minHeight: 44, minWidth: 44, display: 'flex', alignItems: 'center' }}>
-          &larr;
-        </button>
-        <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Log session</h2>
-      </div>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="Log Session" onBack={() => setAdding(false)} />
 
       {/* Quick-pick from stash */}
       {strains.filter(s => s.inStock).length > 0 && (
@@ -211,16 +210,31 @@ export default function SessionLog() {
   )
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Sessions</h2>
-        <button onClick={() => setAdding(true)} style={{
-          background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 6,
-          padding: '0 16px', height: 44, fontSize: 14, fontWeight: 500, cursor: 'pointer',
-        }}>
-          + Log
-        </button>
-      </div>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader
+        title="Sessions"
+        onBack={() => navigate('/')}
+        right={
+          <button
+            onClick={() => setAdding(true)}
+            style={{
+              background: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 8,
+              width: 44,
+              height: 44,
+              minHeight: 44,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Plus size={18} strokeWidth={2.5} />
+          </button>
+        }
+      />
 
       {sessions.length === 0 && (
         <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No sessions logged yet.</p>

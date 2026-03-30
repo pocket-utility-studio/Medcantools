@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import PageHeader from '../components/PageHeader'
 
 type TempRange = 'low' | 'mid-low' | 'mid' | 'mid-high' | 'high'
 
@@ -52,16 +54,14 @@ const RANGE_LABELS: Record<TempRange, string> = {
 }
 
 export default function TempGuide() {
+  const navigate = useNavigate()
   const [temp, setTemp] = useState(185)
   const range = getTempRange(temp)
   const profile = EFFECT_PROFILES[range]
 
   return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px' }}>Temperature guide</h2>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 32px' }}>
-        Drag to find your ideal vape temperature
-      </p>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="Temperature Guide" onBack={() => navigate('/guide')} />
 
       {/* Temp display */}
       <div style={{ textAlign: 'center', marginBottom: 24 }}>

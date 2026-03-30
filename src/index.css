@@ -2,14 +2,14 @@
 
 @layer base {
   :root {
-    --bg: #0d0f0c;
-    --surface: #161a14;
-    --border: #252b21;
-    --accent: #5a8a3a;
-    --accent-dim: #3d6028;
-    --text: #e8ede4;
-    --text-muted: #6b7a62;
-    --text-dim: #3d4a36;
+    --bg: #111111;
+    --surface: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #3b7651;
+    --accent-dim: #2a5a3c;
+    --text: #f0f0f0;
+    --text-muted: #888888;
+    --text-dim: #444444;
   }
 
   * {

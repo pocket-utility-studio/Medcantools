@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useStash } from '../context/StashContext'
+import PageHeader from '../components/PageHeader'
 
 type Feedback = 'idle' | 'saved' | 'loaded' | 'error'
 
 export default function Settings() {
+  const navigate = useNavigate()
   const { strains } = useStash()
 
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '')
@@ -82,8 +85,8 @@ export default function Settings() {
   }
 
   return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 28px' }}>Settings</h2>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="Settings" onBack={() => navigate('/')} />
 
       {/* API Key */}
       <section style={{ marginBottom: 32 }}>

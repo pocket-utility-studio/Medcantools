@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import PageHeader from '../components/PageHeader'
 
 const METHODS = [
   {
@@ -54,14 +56,12 @@ const METHODS = [
 const diffColor: Record<string, string> = { Easy: '#6aaa40', Medium: '#c08030', Advanced: '#e05555' }
 
 export default function AVBGuide() {
+  const navigate = useNavigate()
   const [expanded, setExpanded] = useState<string | null>(null)
 
   return (
-    <div>
-      <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 4px' }}>AVB guide</h2>
-      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 24px' }}>
-        6 ways to use already-vaped bud
-      </p>
+    <div style={{ padding: '20px 16px 40px' }}>
+      <PageHeader title="AVB Guide" onBack={() => navigate('/guide')} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {METHODS.map((m) => {
