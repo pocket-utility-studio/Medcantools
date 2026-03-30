@@ -154,6 +154,11 @@ export default function Settings() {
         </div>
       </section>
 
+      {/* Version */}
+      <p style={{ fontSize: 12, color: 'var(--text-dim)', margin: '0 0 32px' }}>
+        Version {__APP_VERSION__}
+      </p>
+
       {/* Clear data */}
       <section>
         <p style={sectionLabel}>Danger zone</p>
