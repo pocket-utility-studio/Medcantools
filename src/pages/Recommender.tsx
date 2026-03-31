@@ -131,7 +131,7 @@ export default function Recommender() {
             color: tab === t ? '#fff' : 'var(--text-muted)',
             fontSize: 13, fontWeight: 400,
             minHeight: 40, cursor: 'pointer',
-            textAlign: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {t === 'ask' ? 'Ask' : `Saved${savedRecs.length > 0 ? ` (${savedRecs.length})` : ''}`}
           </button>
@@ -245,7 +245,7 @@ export default function Recommender() {
                       fontWeight: 400,
                       minHeight: 40,
                       cursor: 'pointer',
-                      textAlign: 'center',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
                   >
                     {label}
