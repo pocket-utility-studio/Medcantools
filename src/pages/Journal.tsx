@@ -6,6 +6,7 @@ import AddStrain from '../components/AddStrain'
 import StrainDetail from '../components/StrainDetail'
 import StrainSearch from '../components/StrainSearch'
 import PageHeader from '../components/PageHeader'
+import BudSprite from '../components/BudSprite'
 
 export default function Journal() {
   const navigate = useNavigate()
@@ -134,6 +135,12 @@ function StrainRow({ strain, onTap }: { strain: StrainEntry; onTap: () => void }
         minHeight: 62,
       }}
     >
+      <BudSprite
+        name={strain.name}
+        type={strain.type}
+        contextText={[strain.effects, strain.terpenes, strain.notes].filter(Boolean).join(' ')}
+        size={36}
+      />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
           {strain.name}
