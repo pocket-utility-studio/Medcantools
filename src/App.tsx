@@ -206,8 +206,10 @@ function Home() {
           margin: '0 auto',
         }}
       >
-        {cards.map(({ to, label, desc, Icon, longPressAction }) => {
+        {cards.map(({ to, label, desc, Icon, longPressAction }, idx) => {
           const cfg = CARD_CONFIG[to]
+          const tilts = [-2.4, 1.6, -3.1, 2.8]
+          const tilt = tilts[idx % tilts.length]
           return (
             <button
               key={to}
@@ -231,6 +233,7 @@ function Home() {
                 cursor: 'pointer',
                 minHeight: 'unset',
                 gap: 16,
+                transform: `rotate(${tilt}deg)`,
               }}
             >
               <div style={{
