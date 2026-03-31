@@ -47,10 +47,9 @@ export default function QuickLog() {
   return (
     <div style={{
       background: 'var(--surface)',
-      border: '2px solid var(--border)',
-      borderRadius: 12,
-      boxShadow: 'var(--shadow-sm)',
-      overflow: 'hidden',
+      border: '3px solid var(--border)',
+      borderRadius: 20,
+      boxShadow: 'var(--shadow-card)',
     }}>
       {/* Header bar */}
       <button

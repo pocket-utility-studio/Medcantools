@@ -286,7 +286,7 @@ function Home() {
       </div>
 
       {/* Quick Log */}
-      <div style={{ padding: '0 16px 16px', maxWidth: 600, width: '100%', margin: '0 auto' }}>
+      <div style={{ padding: '0 16px 16px', maxWidth: 600, width: '100%', margin: '0 auto', transform: 'rotate(-0.8deg) translateZ(0)', willChange: 'transform' }}>
         <QuickLog />
       </div>
 
