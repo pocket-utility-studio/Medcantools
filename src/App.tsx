@@ -233,7 +233,8 @@ function Home() {
                 cursor: 'pointer',
                 minHeight: 'unset',
                 gap: 16,
-                transform: `rotate(${tilt}deg)`,
+                transform: `rotate(${tilt}deg) translateZ(0)`,
+                willChange: 'transform',
               }}
             >
               <div style={{
