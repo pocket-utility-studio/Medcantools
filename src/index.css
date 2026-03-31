@@ -112,7 +112,7 @@
     .hub-card:hover {
       background: var(--accent-dim) !important;
       border-color: var(--accent) !important;
-      transform: rotate(0deg) translateY(-1px) !important;
+      transform: translateY(-1px) !important;
     }
     .hub-card:hover .hub-chevron {
       transform: translateX(3px);
