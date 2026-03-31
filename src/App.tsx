@@ -222,21 +222,21 @@ function Home() {
                 display: 'flex',
                 alignItems: 'center',
                 background: 'var(--surface)',
-                border: '2px solid var(--border)',
-                borderRadius: 12,
-                boxShadow: 'var(--shadow)',
-                padding: '14px 16px',
+                border: '3px solid var(--border)',
+                borderRadius: 20,
+                boxShadow: 'var(--shadow-card)',
+                padding: '18px 20px',
                 width: '100%',
                 textAlign: 'left',
                 cursor: 'pointer',
                 minHeight: 'unset',
-                gap: 14,
+                gap: 16,
               }}
             >
               <div style={{
-                width: 42,
-                height: 42,
-                borderRadius: 10,
+                width: 48,
+                height: 48,
+                borderRadius: 13,
                 border: `2px solid ${cfg.iconColor}`,
                 background: cfg.iconBg,
                 display: 'flex',
@@ -244,7 +244,7 @@ function Home() {
                 justifyContent: 'center',
                 flexShrink: 0,
               }}>
-                <Icon size={19} color={cfg.iconColor} strokeWidth={2} />
+                <Icon size={21} color={cfg.iconColor} strokeWidth={2} />
               </div>
 
               <div style={{ flex: 1, minWidth: 0 }}>
