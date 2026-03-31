@@ -208,7 +208,7 @@ function Home() {
       >
         {cards.map(({ to, label, desc, Icon, longPressAction }, idx) => {
           const cfg = CARD_CONFIG[to]
-          const tilts = [-2.4, 1.6, -3.1, 2.8]
+          const tilts = [-1.0, 0.7, -1.4, 1.2]
           const tilt = tilts[idx % tilts.length]
           return (
             <button
