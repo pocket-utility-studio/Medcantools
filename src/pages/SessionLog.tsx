@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus } from 'lucide-react'
+import { Plus, Camera } from 'lucide-react'
 import { useStash } from '../context/StashContext'
 import PageHeader from '../components/PageHeader'
 
@@ -13,12 +13,21 @@ interface SessionEntry {
   symptoms: string[]
   preSeverity: number
   postSeverity?: number
+  mood?: string
   notes?: string
+  imageDataUrl?: string
 }
 
 const STORAGE_KEY = 'dailygrind_sessions'
 const SYMPTOM_OPTS = ['Pain', 'Anxiety', 'Nausea', 'Depression', 'Fatigue', 'Insomnia', 'Stress', 'Focus', 'Mood', 'Appetite']
 const VAPE_TEMPS = [160, 170, 180, 190, 200, 210]
+const MOODS = [
+  { emoji: '😊', label: 'Good' },
+  { emoji: '😌', label: 'Calm' },
+  { emoji: '😴', label: 'Tired' },
+  { emoji: '🤕', label: 'Pain' },
+  { emoji: '😰', label: 'Anxious' },
+]
 
 function loadSessions(): SessionEntry[] {
   try {
@@ -37,6 +46,7 @@ export default function SessionLog() {
   const [sessions, setSessions] = useState<SessionEntry[]>(loadSessions)
   const [adding, setAdding] = useState(false)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form state
   const [strainName, setStrainName] = useState('')
@@ -44,7 +54,9 @@ export default function SessionLog() {
   const [temp, setTemp] = useState<number | undefined>()
   const [symptoms, setSymptoms] = useState<string[]>([])
   const [preSeverity, setPreSeverity] = useState(5)
+  const [mood, setMood] = useState('')
   const [notes, setNotes] = useState('')
+  const [imageDataUrl, setImageDataUrl] = useState<string | undefined>()
 
   function toggleSymptom(s: string) {
     setSymptoms((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s])
@@ -53,6 +65,17 @@ export default function SessionLog() {
   function selectStrain(name: string, type?: 'sativa' | 'indica' | 'hybrid') {
     setStrainName(name)
     setStrainType(type ?? '')
+  }
+
+  function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setImageDataUrl(ev.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
   }
 
   function logSession() {
@@ -65,14 +88,17 @@ export default function SessionLog() {
       temp,
       symptoms,
       preSeverity,
+      mood: mood || undefined,
       notes: notes || undefined,
+      imageDataUrl,
     }
     const updated = [entry, ...sessions]
     setSessions(updated)
     saveSessions(updated)
     // Reset
     setStrainName(''); setStrainType(''); setTemp(undefined)
-    setSymptoms([]); setPreSeverity(5); setNotes('')
+    setSymptoms([]); setPreSeverity(5); setMood('')
+    setNotes(''); setImageDataUrl(undefined)
     setAdding(false)
   }
 
@@ -144,6 +170,28 @@ export default function SessionLog() {
         </div>
       </div>
 
+      {/* Mood */}
+      <div style={{ marginBottom: 16 }}>
+        <label style={labelStyle}>Mood before</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {MOODS.map(m => (
+            <button
+              key={m.emoji}
+              onClick={() => setMood(mood === m.emoji ? '' : m.emoji)}
+              title={m.label}
+              style={{
+                flex: 1, fontSize: 20,
+                background: mood === m.emoji ? 'var(--accent-dim)' : 'var(--surface)',
+                border: `1px solid ${mood === m.emoji ? 'var(--accent)' : 'var(--border)'}`,
+                borderRadius: 6, minHeight: 46, cursor: 'pointer', padding: 0,
+              }}
+            >
+              {m.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Temperature */}
       <div style={{ marginBottom: 16 }}>
         <label style={labelStyle}>Temperature</label>
@@ -190,6 +238,55 @@ export default function SessionLog() {
           <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Mild</span>
           <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>Severe</span>
         </div>
+      </div>
+
+      {/* Photo */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={labelStyle}>Photo (optional)</label>
+        {imageDataUrl ? (
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <img
+              src={imageDataUrl}
+              alt="Session photo"
+              style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)', display: 'block' }}
+            />
+            <button
+              onClick={() => setImageDataUrl(undefined)}
+              style={{
+                position: 'absolute', top: -8, right: -8,
+                background: 'var(--border)', border: 'none', borderRadius: '50%',
+                width: 22, height: 22, fontSize: 12, color: 'var(--bg)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                minHeight: 'unset', lineHeight: 1,
+              }}
+            >
+              ×
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'var(--surface)', border: '1px dashed var(--border)',
+                borderRadius: 8, color: 'var(--text-muted)', fontSize: 13,
+                padding: '12px 16px', cursor: 'pointer', minHeight: 48,
+              }}
+            >
+              <Camera size={15} strokeWidth={2} />
+              Add photo
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handlePhoto}
+              style={{ display: 'none' }}
+            />
+          </>
+        )}
       </div>
 
       {/* Notes */}
@@ -245,15 +342,26 @@ export default function SessionLog() {
           <div key={s.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
               <div>
-                <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)' }}>{s.strainName}</span>
+                <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)' }}>
+                  {s.mood && <span style={{ marginRight: 6 }}>{s.mood}</span>}
+                  {s.strainName}
+                </span>
                 {s.strainType && (
                   <span style={{ fontSize: 11, color: typeColor[s.strainType], marginLeft: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.strainType}</span>
                 )}
               </div>
-              <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-dim)', flexShrink: 0, marginLeft: 8 }}>
                 {new Date(s.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
+
+            {s.imageDataUrl && (
+              <img
+                src={s.imageDataUrl}
+                alt="Session"
+                style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 6, marginBottom: 10, display: 'block' }}
+              />
+            )}
 
             <div style={{ display: 'flex', gap: 16, marginBottom: s.symptoms.length > 0 || s.notes ? 10 : 0 }}>
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Severity: <strong style={{ color: 'var(--text)' }}>{s.preSeverity}/10</strong></span>

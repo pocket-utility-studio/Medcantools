@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { Settings, BookOpen, Sparkles, ClipboardList, Compass, ChevronRight, Moon, Sun } from 'lucide-react'
 import { useStash } from './context/StashContext'
 import Onboarding from './components/Onboarding'
+import QuickLog from './components/QuickLog'
 import Journal from './pages/Journal'
 import Recommender from './pages/Recommender'
 import SessionLog from './pages/SessionLog'
@@ -275,6 +276,11 @@ function Home() {
             </button>
           )
         })}
+      </div>
+
+      {/* Quick Log */}
+      <div style={{ padding: '0 16px 16px', maxWidth: 600, width: '100%', margin: '0 auto' }}>
+        <QuickLog />
       </div>
 
       {/* Footer */}

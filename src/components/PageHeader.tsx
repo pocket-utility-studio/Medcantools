@@ -1,4 +1,5 @@
 import { ChevronLeft } from 'lucide-react'
+import { useSwipeBack } from '../hooks/useSwipeBack'
 
 interface PageHeaderProps {
   title: string
@@ -7,6 +8,7 @@ interface PageHeaderProps {
 }
 
 export default function PageHeader({ title, onBack, right }: PageHeaderProps) {
+  useSwipeBack(onBack)
   return (
     <div style={{
       display: 'flex',
