@@ -285,9 +285,10 @@ export default function Recommender() {
             disabled={!query || status === 'loading'}
             style={{
               width: '100%',
-              background: query && status !== 'loading' ? 'var(--accent)' : 'var(--text-dim)',
-              border: '2px solid ' + (query && status !== 'loading' ? 'var(--accent)' : 'var(--text-dim)'),
+              background: query && status !== 'loading' ? 'var(--border)' : 'var(--surface)',
+              border: '2px solid ' + (query && status !== 'loading' ? 'var(--border)' : 'var(--border)'),
               boxShadow: query && status !== 'loading' ? 'var(--shadow)' : 'none',
+              color: query && status !== 'loading' ? '#fff' : 'var(--text-muted)',
               borderRadius: 12,
               color: '#fff',
               fontSize: 15,
