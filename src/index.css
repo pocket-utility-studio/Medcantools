@@ -148,7 +148,7 @@
   }
 
   .dg-diamond-spin {
-    animation: dg-spin 6s linear infinite;
+    animation: dg-spin 10s linear infinite;
   }
 
   .ripple-wave {
