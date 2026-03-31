@@ -14,7 +14,6 @@
     --text-dim: #bbbbbb;
     --shadow: 2px 2px 0px rgba(26,26,26,0.55);
     --shadow-sm: 1px 1px 0px rgba(26,26,26,0.45);
-    --shadow-card: 5px 5px 0px #1a1a1a;
 
     /* Per-section icon accent colors */
     --icon-stash:    #3b7651;
@@ -40,7 +39,6 @@
     --text-dim: #555550;
     --shadow: 2px 2px 0px rgba(0,0,0,0.6);
     --shadow-sm: 1px 1px 0px rgba(0,0,0,0.5);
-    --shadow-card: 5px 5px 0px rgba(212,208,200,0.5);
 
     --icon-stash-bg: #1e3328;
     --icon-ai-bg:    #25203a;
@@ -107,7 +105,7 @@
   .hub-card:nth-child(2) { transform: rotate(1.2deg);  }
   .hub-card:nth-child(3) { transform: rotate(-0.7deg); }
   .hub-card:nth-child(4) { transform: rotate(2.1deg);  }
-  .hub-card:active          { transform: translate(3px, 3px) rotate(0deg) !important; box-shadow: 2px 2px 0px var(--border) !important; opacity: 0.9; }
+  .hub-card:active          { transform: translate(1px, 1px) rotate(0deg) !important; opacity: 0.85; }
 
   /* Hover/focus state — desktop only */
   @media (hover: hover) {
