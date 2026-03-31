@@ -29,18 +29,18 @@
 
   /* ── Dark mode ────────────────────────────────────────── */
   [data-theme="dark"] {
-    --bg: #1a1a18;
-    --surface: #252520;
-    --border: #d4d0c8;
+    --bg: #111110;
+    --surface: #1e1e1c;
+    --border: #c8c4bc;
     --accent: #5aaa78;
     --accent-dim: #1e3328;
     --accent-glow: rgba(90, 170, 120, 0.15);
     --text: #eeeae0;
-    --text-muted: #a0a090;
-    --text-dim: #555550;
-    --shadow: 2px 2px 0px rgba(0,0,0,0.6);
-    --shadow-sm: 1px 1px 0px rgba(0,0,0,0.5);
-    --shadow-card: 6px 6px 0px rgba(212,208,200,0.45);
+    --text-muted: #888880;
+    --text-dim: #444440;
+    --shadow: 2px 2px 0px rgba(0,0,0,0.8);
+    --shadow-sm: 1px 1px 0px rgba(0,0,0,0.6);
+    --shadow-card: 6px 6px 0px rgba(0,0,0,0.6);
 
     --icon-stash-bg: #1e3328;
     --icon-ai-bg:    #25203a;
