@@ -250,7 +250,7 @@ export default function StrainSearch({ onClose }: Props) {
               justifyContent: 'center',
             }}
           >
-            {loading ? <DiamondSpinner size={22} /> : 'Search'}
+            {loading ? <DiamondSpinner size={32} /> : 'Search'}
           </button>
         </div>
 

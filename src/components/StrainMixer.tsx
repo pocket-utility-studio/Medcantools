@@ -67,7 +67,7 @@ export default function StrainMixer({ strains }: { strains: StrainEntry[] }) {
           marginBottom: error || result ? 14 : 0,
         }}
       >
-        {loading ? <DiamondSpinner size={32} /> : <Shuffle size={15} strokeWidth={2.5} />}
+        {loading ? <DiamondSpinner size={40} /> : <Shuffle size={15} strokeWidth={2.5} />}
         {loading ? 'Asking the Cyber-Botanist…' : 'Get blend suggestions'}
       </button>
 

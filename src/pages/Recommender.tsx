@@ -303,7 +303,7 @@ export default function Recommender() {
               gap: 10,
             }}
           >
-            {status === 'loading' ? <DiamondSpinner size={36} /> : (
+            {status === 'loading' ? <DiamondSpinner size={48} /> : (
               <>
                 <Sparkles size={16} strokeWidth={2} />
                 Get recommendation
