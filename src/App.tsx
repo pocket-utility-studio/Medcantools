@@ -4,6 +4,7 @@ import { Settings, BookOpen, Sparkles, ClipboardList, Compass, ChevronRight, Moo
 import { useStash } from './context/StashContext'
 import Onboarding from './components/Onboarding'
 import QuickLog from './components/QuickLog'
+import DiamondSpinner from './components/DiamondSpinner'
 import Journal from './pages/Journal'
 import Recommender from './pages/Recommender'
 import SessionLog from './pages/SessionLog'
@@ -319,6 +320,8 @@ function Home() {
         >
           {dark ? <Sun size={16} strokeWidth={2} /> : <Moon size={16} strokeWidth={2} />}
         </button>
+
+        <DiamondSpinner size={22} />
 
         <span style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'monospace' }}>
           v{__APP_VERSION__}
