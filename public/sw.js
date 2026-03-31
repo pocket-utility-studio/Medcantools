@@ -1,4 +1,5 @@
-const CACHE = 'dailygrind-v1'
+const VERSION = new URL(self.location.href).searchParams.get('v') || 'dev'
+const CACHE = `dailygrind-${VERSION}`
 
 const APP_SHELL = [
   '/Medcantools/',
