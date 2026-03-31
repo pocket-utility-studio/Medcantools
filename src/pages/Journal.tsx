@@ -138,12 +138,6 @@ function StrainRow({ strain, onTap }: { strain: StrainEntry; onTap: () => void }
         minHeight: 62,
       }}
     >
-      <BudSprite
-        name={strain.name}
-        type={strain.type}
-        contextText={[strain.effects, strain.terpenes, strain.notes].filter(Boolean).join(' ')}
-        size={36}
-      />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
           {strain.name}
@@ -165,15 +159,12 @@ function StrainRow({ strain, onTap }: { strain: StrainEntry; onTap: () => void }
           )}
         </div>
       </div>
-      {strain.notes && (
-        <div style={{
-          fontSize: 12, color: 'var(--text-dim)',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          maxWidth: '35%', flexShrink: 0,
-        }}>
-          {strain.notes}
-        </div>
-      )}
+      <BudSprite
+        name={strain.name}
+        type={strain.type}
+        contextText={[strain.effects, strain.terpenes, strain.notes].filter(Boolean).join(' ')}
+        size={38}
+      />
     </button>
   )
 }

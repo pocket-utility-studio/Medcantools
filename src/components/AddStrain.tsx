@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Camera, Search, Check, X } from 'lucide-react'
 import { useStash } from '../context/StashContext'
 import { lookupStrainData, parseStrainFromImage } from '../services/ai'
@@ -8,14 +8,29 @@ interface Props {
   onClose: () => void
 }
 
+interface StrainRecord { Strain: string }
+let _db: StrainRecord[] | null = null
+async function fetchDb(): Promise<StrainRecord[]> {
+  if (_db) return _db
+  try { _db = await fetch('/Medcantools/strains.json').then(r => r.json()) } catch { _db = [] }
+  return _db!
+}
+
+function formatName(raw: string): string {
+  return raw.replace(/-/g, ' ')
+}
+
 export default function AddStrain({ onClose }: Props) {
   const { addStrain } = useStash()
   const fileRef = useRef<HTMLInputElement>(null)
+  const suggestRef = useRef<HTMLDivElement>(null)
 
   const [name, setName] = useState('')
   const [thc, setThc] = useState('')
   const [cbd, setCbd] = useState('')
   const [type, setType] = useState<'sativa' | 'indica' | 'hybrid' | ''>('')
+  const [terpenes, setTerpenes] = useState('')
+  const [effects, setEffects] = useState('')
   const [amount, setAmount] = useState('')
   const [notes, setNotes] = useState('')
   const [inStock, setInStock] = useState(true)
@@ -26,20 +41,69 @@ export default function AddStrain({ onClose }: Props) {
   const [scanDone, setScanDone] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleLookup() {
-    if (!name.trim()) return
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+
+  // Autocomplete: search DB as user types
+  useEffect(() => {
+    if (name.length < 2) { setSuggestions([]); return }
+    let cancelled = false
+    fetchDb().then(db => {
+      if (cancelled) return
+      const q = name.toLowerCase()
+      const starts: string[] = []
+      const contains: string[] = []
+      for (const r of db) {
+        const n = formatName(String(r.Strain))
+        const nl = n.toLowerCase()
+        if (nl.startsWith(q)) starts.push(n)
+        else if (nl.includes(q)) contains.push(n)
+        if (starts.length >= 6 && contains.length >= 4) break
+      }
+      setSuggestions([...starts, ...contains].slice(0, 8))
+    })
+    return () => { cancelled = true }
+  }, [name])
+
+  // Close suggestions on outside tap
+  useEffect(() => {
+    function onTap(e: MouseEvent | TouchEvent) {
+      if (suggestRef.current && !suggestRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', onTap)
+    document.addEventListener('touchstart', onTap)
+    return () => {
+      document.removeEventListener('mousedown', onTap)
+      document.removeEventListener('touchstart', onTap)
+    }
+  }, [])
+
+  async function handleLookup(lookupName?: string) {
+    const target = (lookupName ?? name).trim()
+    if (!target) return
     setLookingUp(true)
     setError('')
     try {
-      const data = await lookupStrainData(name.trim())
-      if (data.thc != null) setThc(String(data.thc))
-      if (data.cbd != null) setCbd(String(data.cbd))
-      if (data.type) setType(data.type)
+      const data = await lookupStrainData(target)
+      if (data.thc != null)  setThc(String(data.thc))
+      if (data.cbd != null)  setCbd(String(data.cbd))
+      if (data.type)         setType(data.type)
+      if (data.terpenes)     setTerpenes(data.terpenes)
+      if (data.effects)      setEffects(data.effects)
     } catch {
       setError('Lookup failed. Check your API key in Settings.')
     } finally {
       setLookingUp(false)
     }
+  }
+
+  function selectSuggestion(s: string) {
+    setName(s)
+    setSuggestions([])
+    setShowSuggestions(false)
+    handleLookup(s)
   }
 
   async function handleScan(e: React.ChangeEvent<HTMLInputElement>) {
@@ -70,7 +134,6 @@ export default function AddStrain({ onClose }: Props) {
         setImageDataUrl(undefined)
       } finally {
         setScanning(false)
-        // Reset file input so same file can be re-scanned
         if (fileRef.current) fileRef.current.value = ''
       }
     }
@@ -90,6 +153,8 @@ export default function AddStrain({ onClose }: Props) {
       thc: thc ? parseFloat(thc) : undefined,
       cbd: cbd ? parseFloat(cbd) : undefined,
       type: type || undefined,
+      terpenes: terpenes || undefined,
+      effects: effects || undefined,
       amount: amount || undefined,
       notes: notes || undefined,
       inStock,
@@ -122,7 +187,7 @@ export default function AddStrain({ onClose }: Props) {
     <div style={{ padding: '20px 16px 40px' }}>
       <PageHeader title="Add Strain" onBack={onClose} />
 
-      {/* Camera scan — hero action */}
+      {/* Camera scan */}
       <input
         ref={fileRef}
         type="file"
@@ -153,10 +218,7 @@ export default function AddStrain({ onClose }: Props) {
           }}
         >
           {scanning ? (
-            <>
-              <ScanSpinner />
-              <span style={{ fontSize: 13 }}>Reading label…</span>
-            </>
+            <><ScanSpinner /><span style={{ fontSize: 13 }}>Reading label…</span></>
           ) : (
             <>
               <Camera size={28} strokeWidth={1.5} />
@@ -167,11 +229,7 @@ export default function AddStrain({ onClose }: Props) {
         </button>
       ) : (
         <div style={{ position: 'relative', marginBottom: 20 }}>
-          <img
-            src={imageDataUrl}
-            alt=""
-            style={{ width: '100%', borderRadius: 12, maxHeight: 180, objectFit: 'cover', display: 'block' }}
-          />
+          <img src={imageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 180, objectFit: 'cover', display: 'block' }} />
           {scanDone && (
             <div style={{
               position: 'absolute', top: 10, left: 10,
@@ -197,7 +255,6 @@ export default function AddStrain({ onClose }: Props) {
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div style={{
           background: '#fff5f5', border: '2px solid #e05555',
@@ -207,38 +264,71 @@ export default function AddStrain({ onClose }: Props) {
         </div>
       )}
 
-      {/* Name + AI lookup */}
+      {/* Name + AI lookup with autocomplete */}
       <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>Strain name</label>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Blue Dream"
-            style={{ ...inputStyle, flex: 1 }}
-          />
-          <button
-            onClick={handleLookup}
-            disabled={lookingUp || !name.trim()}
-            title="AI auto-fill from name"
-            style={{
-              background: name.trim() && !lookingUp ? 'var(--accent-dim)' : 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              color: name.trim() ? 'var(--text)' : 'var(--text-dim)',
-              fontSize: 13,
-              padding: '0 14px',
-              cursor: name.trim() ? 'pointer' : 'default',
-              minHeight: 44,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <Search size={14} strokeWidth={2} />
-            {lookingUp ? '…' : 'Look up'}
-          </button>
+        <div ref={suggestRef} style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              value={name}
+              onChange={e => { setName(e.target.value); setShowSuggestions(true) }}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder="e.g. Blue Dream"
+              style={{ ...inputStyle, flex: 1 }}
+              autoComplete="off"
+            />
+            <button
+              onClick={() => handleLookup()}
+              disabled={lookingUp || !name.trim()}
+              title="AI auto-fill from name"
+              style={{
+                background: name.trim() && !lookingUp ? 'var(--accent-dim)' : 'var(--surface)',
+                border: '2px solid var(--border)',
+                borderRadius: 10,
+                color: name.trim() ? 'var(--text)' : 'var(--text-dim)',
+                fontSize: 13,
+                padding: '0 14px',
+                cursor: name.trim() ? 'pointer' : 'default',
+                minHeight: 44,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Search size={14} strokeWidth={2} />
+              {lookingUp ? '…' : 'Look up'}
+            </button>
+          </div>
+
+          {/* Suggestions dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: 'var(--surface)', border: '2px solid var(--accent)',
+              borderRadius: 10, boxShadow: 'var(--shadow)',
+              zIndex: 100, overflow: 'hidden', marginTop: 4,
+            }}>
+              {suggestions.map((s, i) => (
+                <button
+                  key={s}
+                  onMouseDown={e => { e.preventDefault(); selectSuggestion(s) }}
+                  onTouchStart={e => { e.preventDefault(); selectSuggestion(s) }}
+                  style={{
+                    width: '100%', textAlign: 'left',
+                    background: 'none',
+                    borderBottom: i < suggestions.length - 1 ? '1px solid var(--border)' : 'none',
+                    border: 'none',
+                    color: 'var(--text)', fontSize: 14,
+                    padding: '11px 14px', cursor: 'pointer',
+                    minHeight: 44, display: 'block',
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -246,11 +336,11 @@ export default function AddStrain({ onClose }: Props) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
         <div>
           <label style={labelStyle}>THC %</label>
-          <input type="number" value={thc} onChange={(e) => setThc(e.target.value)} placeholder="e.g. 20" style={inputStyle} />
+          <input type="number" value={thc} onChange={e => setThc(e.target.value)} placeholder="e.g. 20" style={inputStyle} />
         </div>
         <div>
           <label style={labelStyle}>CBD %</label>
-          <input type="number" value={cbd} onChange={(e) => setCbd(e.target.value)} placeholder="e.g. 0.5" style={inputStyle} />
+          <input type="number" value={cbd} onChange={e => setCbd(e.target.value)} placeholder="e.g. 0.5" style={inputStyle} />
         </div>
       </div>
 
@@ -258,23 +348,15 @@ export default function AddStrain({ onClose }: Props) {
       <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>Type</label>
         <div style={{ display: 'flex', gap: 8 }}>
-          {(['sativa', 'indica', 'hybrid'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setType(type === t ? '' : t)}
-              style={{
-                flex: 1,
-                background: type === t ? 'var(--accent-dim)' : 'var(--surface)',
-                border: `2px solid ${type === t ? 'var(--accent)' : 'var(--border)'}`,
-                borderRadius: 10,
-                color: type === t ? 'var(--text)' : 'var(--text-muted)',
-                fontSize: 13,
-                fontWeight: type === t ? 600 : 400,
-                cursor: 'pointer',
-                minHeight: 44,
-                textTransform: 'capitalize',
-              }}
-            >
+          {(['sativa', 'indica', 'hybrid'] as const).map(t => (
+            <button key={t} onClick={() => setType(type === t ? '' : t)} style={{
+              flex: 1,
+              background: type === t ? 'var(--accent-dim)' : 'var(--surface)',
+              border: `2px solid ${type === t ? 'var(--accent)' : 'var(--border)'}`,
+              borderRadius: 10, color: type === t ? 'var(--text)' : 'var(--text-muted)',
+              fontSize: 13, fontWeight: type === t ? 600 : 400,
+              cursor: 'pointer', minHeight: 44, textTransform: 'capitalize',
+            }}>
               {t}
             </button>
           ))}
@@ -284,7 +366,7 @@ export default function AddStrain({ onClose }: Props) {
       {/* Amount */}
       <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>Amount</label>
-        <input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="e.g. 3.5g" style={inputStyle} />
+        <input value={amount} onChange={e => setAmount(e.target.value)} placeholder="e.g. 3.5g" style={inputStyle} />
       </div>
 
       {/* Notes */}
@@ -292,7 +374,7 @@ export default function AddStrain({ onClose }: Props) {
         <label style={labelStyle}>Notes</label>
         <textarea
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={e => setNotes(e.target.value)}
           placeholder="Flavour, effects, observations…"
           rows={3}
           style={{ ...inputStyle, resize: 'none', lineHeight: 1.6 }}
@@ -312,15 +394,13 @@ export default function AddStrain({ onClose }: Props) {
             width: 48, height: 28, borderRadius: 14, border: 'none',
             background: inStock ? 'var(--accent)' : 'var(--border)',
             cursor: 'pointer', position: 'relative',
-            minHeight: 'unset', minWidth: 'unset',
-            transition: 'background 0.15s',
+            minHeight: 'unset', minWidth: 'unset', transition: 'background 0.15s',
           }}
         >
           <span style={{
             position: 'absolute', top: 3,
-            left: inStock ? 23 : 3,
-            width: 22, height: 22, borderRadius: '50%',
-            background: '#fff', transition: 'left 0.15s',
+            left: inStock ? 23 : 3, width: 22, height: 22,
+            borderRadius: '50%', background: '#fff', transition: 'left 0.15s',
           }} />
         </button>
       </div>
@@ -345,13 +425,10 @@ export default function AddStrain({ onClose }: Props) {
 function ScanSpinner() {
   return (
     <div style={{ position: 'relative', width: 32, height: 32 }}>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <div style={{
         width: 32, height: 32, borderRadius: '50%',
-        border: '2px solid var(--border)',
-        borderTopColor: 'var(--accent)',
+        border: '2px solid var(--border)', borderTopColor: 'var(--accent)',
         animation: 'spin 0.8s linear infinite',
       }} />
     </div>
