@@ -59,33 +59,34 @@ function Home() {
           onClick={() => navigate('/settings')}
           style={{
             position: 'absolute',
-            right: 8,
-            background: 'none',
-            border: 'none',
+            right: 12,
+            background: 'var(--surface)',
+            border: '2px solid var(--border)',
+            borderRadius: '50%',
+            boxShadow: 'var(--shadow-sm)',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            minHeight: 44,
-            minWidth: 44,
+            minHeight: 'unset',
+            width: 40,
+            height: 40,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Settings size={20} strokeWidth={2} />
+          <Settings size={18} strokeWidth={2} />
         </button>
       </div>
 
       {/* Cards */}
       <div style={{
-        flex: 1,
         display: 'flex',
         flexDirection: 'column',
         gap: 12,
-        padding: '28px 16px 32px',
+        padding: '24px 16px 32px',
         maxWidth: 600,
         width: '100%',
         margin: '0 auto',
-        alignSelf: 'center',
       }}>
         {cards.map(({ to, label, desc, Icon }) => (
           <button
@@ -93,18 +94,17 @@ function Home() {
             onClick={() => navigate(to)}
             className="hub-card"
             style={{
-              flex: 1,
               display: 'flex',
               alignItems: 'center',
               background: 'var(--surface)',
               border: '2px solid var(--border)',
               borderRadius: 12,
               boxShadow: 'var(--shadow)',
-              padding: '0 16px',
+              padding: '14px 16px',
               width: '100%',
               textAlign: 'left',
               cursor: 'pointer',
-              minHeight: 72,
+              minHeight: 'unset',
               gap: 14,
             }}
           >
