@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, ClipboardList } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useStash, type StrainEntry } from '../context/StashContext'
 import { lookupStrainData } from '../services/ai'
 import PageHeader from './PageHeader'
@@ -15,8 +16,19 @@ const TYPE_COLOR: Record<string, string> = {
   hybrid: '#c08030',
 }
 
+function getSessionCount(strainName: string): number {
+  try {
+    const sessions = JSON.parse(localStorage.getItem('dailygrind_sessions') || '[]')
+    return sessions.filter((s: { strainName: string }) =>
+      s.strainName.toLowerCase() === strainName.toLowerCase()
+    ).length
+  } catch { return 0 }
+}
+
 export default function StrainDetail({ strain, onClose }: Props) {
+  const navigate = useNavigate()
   const { updateStrain, deleteStrain } = useStash()
+  const sessionCount = getSessionCount(strain.name)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [enriching, setEnriching] = useState(false)
   const [enriched, setEnriched] = useState(false)
@@ -152,6 +164,27 @@ export default function StrainDetail({ strain, onClose }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Session history link */}
+      <button
+        onClick={() => navigate(`/sessions/strain?strain=${encodeURIComponent(strain.name)}`)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'var(--surface)', border: '2px solid var(--border)',
+          borderRadius: 10, boxShadow: 'var(--shadow-sm)',
+          color: 'var(--text)', fontSize: 14, fontWeight: 600,
+          minHeight: 48, cursor: 'pointer', padding: '0 16px',
+          marginBottom: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ClipboardList size={15} color="var(--icon-notes)" strokeWidth={2} />
+          Field notes
+        </div>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 400 }}>
+          {sessionCount === 0 ? 'No sessions yet' : `${sessionCount} session${sessionCount !== 1 ? 's' : ''}`}
+        </span>
+      </button>
 
       {/* AI enrich */}
       {enrichError && (

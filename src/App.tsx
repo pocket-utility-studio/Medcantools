@@ -12,6 +12,9 @@ import TempGuide from './pages/TempGuide'
 import EscapeRope from './pages/EscapeRope'
 import AVBGuide from './pages/AVBGuide'
 import LawGuide from './pages/LawGuide'
+import CannabisHistory from './pages/CannabisHistory'
+import FamousStrains from './pages/FamousStrains'
+import StrainSessions from './pages/StrainSessions'
 import SettingsPage from './pages/Settings'
 
 // ── Dark mode ──────────────────────────────────────────────────────────────────
@@ -363,9 +366,12 @@ export default function App() {
           <Route path="/guide"        element={<Guide />} />
           <Route path="/guide/temp"   element={<TempGuide />} />
           <Route path="/guide/escape" element={<EscapeRope />} />
-          <Route path="/guide/avb"    element={<AVBGuide />} />
-          <Route path="/guide/law"    element={<LawGuide />} />
-          <Route path="/settings"     element={<SettingsPage />} />
+          <Route path="/guide/avb"     element={<AVBGuide />} />
+          <Route path="/guide/law"     element={<LawGuide />} />
+          <Route path="/guide/history" element={<CannabisHistory />} />
+          <Route path="/guide/strains" element={<FamousStrains />} />
+          <Route path="/sessions/strain" element={<StrainSessions />} />
+          <Route path="/settings"      element={<SettingsPage />} />
         </Routes>
       </div>
     </BrowserRouter>

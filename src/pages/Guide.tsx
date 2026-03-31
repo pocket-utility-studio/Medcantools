@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Thermometer, Wind, Leaf, Scale, ChevronRight, Search, ChevronDown, ChevronUp } from 'lucide-react'
+import { Thermometer, Wind, Leaf, Scale, ChevronRight, Search, ChevronDown, ChevronUp, BookOpen, Star } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 
 const GUIDES = [
-  { to: '/guide/temp',   label: 'Temperature guide', desc: 'Find your ideal vape temp',           Icon: Thermometer, tags: ['temp','vape','heat','degrees','celsius'] },
-  { to: '/guide/escape', label: 'Calm down',          desc: 'Breathing, sounds, grounding',        Icon: Wind,        tags: ['calm','anxiety','panic','breathing','grounding','stress'] },
-  { to: '/guide/avb',    label: 'AVB guide',          desc: '6 ways to use already-vaped bud',     Icon: Leaf,        tags: ['avb','already vaped','edibles','reclaim'] },
-  { to: '/guide/law',    label: 'Law guide',          desc: 'UK and Spain cannabis law reference', Icon: Scale,       tags: ['law','legal','uk','spain','rules'] },
+  { to: '/guide/temp',    label: 'Temperature guide', desc: 'Find your ideal vape temp',           Icon: Thermometer, tags: ['temp','vape','heat','degrees','celsius'] },
+  { to: '/guide/escape',  label: 'Calm down',          desc: 'Breathing, sounds, grounding',        Icon: Wind,        tags: ['calm','anxiety','panic','breathing','grounding','stress'] },
+  { to: '/guide/avb',     label: 'AVB guide',          desc: '6 ways to use already-vaped bud',     Icon: Leaf,        tags: ['avb','already vaped','edibles','reclaim'] },
+  { to: '/guide/law',     label: 'Law guide',          desc: 'UK and Spain cannabis law reference', Icon: Scale,       tags: ['law','legal','uk','spain','rules'] },
+  { to: '/guide/history', label: 'Cannabis history',   desc: 'On this day + science & culture facts', Icon: BookOpen,  tags: ['history','facts','science','culture','trivia','law'] },
+  { to: '/guide/strains', label: 'Famous strains',     desc: '25 iconic strains from every era',    Icon: Star,        tags: ['strains','famous','legendary','og kush','skunk','haze','history'] },
 ]
 
 const TERPENES = [

@@ -207,9 +207,64 @@ export async function mixStrains(strainA: EnrichedStrain, strainB: EnrichedStrai
   return result.response.text().trim()
 }
 
+// ── Offline strain DB ──────────────────────────────────────────────────────────
+
+interface StrainRecord {
+  Strain: string
+  Type?: string
+  Effects?: string
+  Flavor?: string
+  Description?: string
+  terpenes?: string
+  thc?: number
+  cbd?: number
+  medical?: string
+}
+
+let _strainDb: StrainRecord[] | null = null
+
+async function getStrainDb(): Promise<StrainRecord[]> {
+  if (_strainDb) return _strainDb
+  try {
+    const res = await fetch('/Medcantools/strains.json')
+    _strainDb = await res.json()
+  } catch {
+    _strainDb = []
+  }
+  return _strainDb!
+}
+
+function normalise(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+export async function lookupStrainOffline(name: string): Promise<StrainLookupResult | null> {
+  const db = await getStrainDb()
+  const norm = normalise(name)
+  const match = db.find(r => normalise(String(r.Strain)) === norm)
+  if (!match) return null
+  const out: StrainLookupResult = {}
+  if (typeof match.thc === 'number') out.thc = match.thc
+  if (typeof match.cbd === 'number') out.cbd = match.cbd
+  const t = match.Type?.toLowerCase()
+  if (t === 'sativa' || t === 'indica' || t === 'hybrid') out.type = t
+  if (match.terpenes) out.terpenes = match.terpenes
+  if (match.Effects)  out.effects  = match.Effects
+  if (match.Description) out.history = match.Description.slice(0, 300)
+  return out
+}
+
 // ── Strain lookup ──────────────────────────────────────────────────────────────
 
 export async function lookupStrainData(name: string): Promise<StrainLookupResult> {
+  // Try offline DB first if no API key
+  let key: string | null = null
+  try { key = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY } catch { /* ignore */ }
+  if (!key) {
+    const offline = await lookupStrainOffline(name)
+    if (offline) return offline
+    throw new Error('NO_KEY')
+  }
   const client = getClient()
   const model = client.getGenerativeModel({
     model: 'gemini-2.5-flash',
