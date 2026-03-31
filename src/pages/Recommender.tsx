@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Leaf, Thermometer, BookOpen, Eye, Sparkles } from 'lucide-react'
+import { Leaf, Thermometer, BookOpen, Eye, Sparkles, Bookmark, BookmarkCheck, Trash2 } from 'lucide-react'
 import { useStash } from '../context/StashContext'
 import { getRecommendation, type EnrichedStrain } from '../services/ai'
 import PageHeader from '../components/PageHeader'
@@ -39,6 +39,7 @@ export default function Recommender() {
   const { strains } = useStash()
   const inStock = strains.filter((s) => s.inStock)
 
+  const [tab, setTab] = useState<'ask' | 'saved'>('ask')
   const [selected, setSelected] = useState<string[]>([])
   const [freeText, setFreeText] = useState('')
   const [timeOfDay] = useState<TimeOfDay>(detectTimeOfDay)
@@ -46,6 +47,10 @@ export default function Recommender() {
   const [status, setStatus] = useState<Status>('idle')
   const [response, setResponse] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [saved, setSaved] = useState<boolean>(false)
+  const [savedRecs, setSavedRecs] = useState<Array<{ query: string; text: string; date: string }>>(() => {
+    try { return JSON.parse(localStorage.getItem('dg_saved_recs') || '[]') } catch { return [] }
+  })
 
   function toggleTag(tag: string) {
     setSelected((prev) =>
@@ -55,9 +60,25 @@ export default function Recommender() {
 
   const query = [selected.join(', '), freeText.trim()].filter(Boolean).join('. ')
 
+  function saveRec() {
+    if (!response) return
+    const rec = { query, text: response, date: new Date().toISOString() }
+    const updated = [rec, ...savedRecs].slice(0, 20)
+    setSavedRecs(updated)
+    localStorage.setItem('dg_saved_recs', JSON.stringify(updated))
+    setSaved(true)
+  }
+
+  function deleteRec(date: string) {
+    const updated = savedRecs.filter(r => r.date !== date)
+    setSavedRecs(updated)
+    localStorage.setItem('dg_saved_recs', JSON.stringify(updated))
+  }
+
   async function handleAsk() {
     if (!query || inStock.length === 0) return
     localStorage.setItem('dg_last_query', selected.length > 0 ? selected.join(', ') : freeText.trim())
+    setSaved(false)
     setStatus('loading')
     setResponse('')
     setErrorMsg('')
@@ -96,7 +117,61 @@ export default function Recommender() {
     <div style={{ padding: '20px 16px 40px' }}>
       <PageHeader title="Cyber-Botanist" onBack={() => navigate('/')} />
 
-      {inStock.length === 0 ? (
+      {/* Tab switcher */}
+      <div style={{
+        display: 'flex', background: 'var(--surface)',
+        border: '2px solid var(--border)', borderRadius: 10,
+        padding: 3, gap: 3, marginBottom: 20,
+      }}>
+        {(['ask', 'saved'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{
+            flex: 1, background: tab === t ? 'var(--border)' : 'none',
+            border: 'none', borderRadius: 7,
+            color: tab === t ? '#fff' : 'var(--text-muted)',
+            fontSize: 13, fontWeight: tab === t ? 700 : 400,
+            minHeight: 40, cursor: 'pointer',
+          }}>
+            {t === 'ask' ? 'Ask' : `Saved${savedRecs.length > 0 ? ` (${savedRecs.length})` : ''}`}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'saved' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {savedRecs.length === 0 && (
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
+              No saved recommendations yet. Ask a question and save the answer.
+            </p>
+          )}
+          {savedRecs.map(rec => (
+            <div key={rec.date} style={{
+              background: 'var(--surface)', border: '2px solid var(--border)',
+              borderRadius: 12, boxShadow: 'var(--shadow-sm)', overflow: 'hidden',
+            }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 14px', borderBottom: '1px solid var(--border)',
+              }}>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', margin: 0 }}>{rec.query}</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-dim)', margin: '2px 0 0' }}>
+                    {new Date(rec.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
+                </div>
+                <button onClick={() => deleteRec(rec.date)} style={{
+                  background: 'none', border: 'none', color: 'var(--text-dim)',
+                  cursor: 'pointer', minHeight: 'unset', padding: 4,
+                }}>
+                  <Trash2 size={15} strokeWidth={2} />
+                </button>
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, padding: '12px 14px', margin: 0 }}>
+                {rec.text.slice(0, 300)}{rec.text.length > 300 ? '…' : ''}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : inStock.length === 0 ? (
         <div style={{
           background: 'var(--surface)',
           border: '2px solid var(--border)',
@@ -249,10 +324,31 @@ export default function Recommender() {
 
           {/* Response */}
           {(status === 'done' || status === 'loading') && response && (
-            <ResponseDisplay text={response} />
+            <>
+              <ResponseDisplay text={response} />
+              {status === 'done' && (
+                <button
+                  onClick={saveRec}
+                  disabled={saved}
+                  style={{
+                    marginTop: 12, width: '100%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    background: saved ? 'var(--accent-dim)' : 'var(--surface)',
+                    border: `2px solid ${saved ? 'var(--accent)' : 'var(--border)'}`,
+                    borderRadius: 10, boxShadow: saved ? 'none' : 'var(--shadow-sm)',
+                    color: saved ? 'var(--accent)' : 'var(--text)',
+                    fontSize: 14, fontWeight: 600,
+                    minHeight: 48, cursor: saved ? 'default' : 'pointer',
+                  }}
+                >
+                  {saved ? <BookmarkCheck size={15} strokeWidth={2} /> : <Bookmark size={15} strokeWidth={2} />}
+                  {saved ? 'Saved to favourites' : 'Save this recommendation'}
+                </button>
+              )}
+            </>
           )}
         </>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate, useSearchParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import { Settings, BookOpen, Sparkles, ClipboardList, Compass, ChevronRight, Moon, Sun } from 'lucide-react'
 import { useStash } from './context/StashContext'
+import Onboarding from './components/Onboarding'
 import Journal from './pages/Journal'
 import Recommender from './pages/Recommender'
 import SessionLog from './pages/SessionLog'
@@ -40,6 +41,16 @@ const CARD_CONFIG: Record<string, { iconColor: string; iconBg: string }> = {
   '/guide':     { iconColor: 'var(--icon-guide)',   iconBg: 'var(--icon-guide-bg)'  },
 }
 
+const DEFAULT_ORDER = ['/journal', '/recommend', '/sessions', '/guide']
+
+export function loadCardOrder(): string[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem('dg_card_order') || 'null')
+    if (Array.isArray(saved) && saved.length === DEFAULT_ORDER.length) return saved
+  } catch { /* ignore */ }
+  return DEFAULT_ORDER
+}
+
 // ── Ripple helper ──────────────────────────────────────────────────────────────
 
 function fireRipple(e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) {
@@ -62,6 +73,8 @@ function Home() {
   const { strains } = useStash()
   const [dark, toggleDark] = useDarkMode()
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('dg_onboarded'))
+  const [cardOrder] = useState(loadCardOrder)
 
   // Stashbox data
   const inStock = strains.filter(s => s.inStock)
@@ -96,7 +109,7 @@ function Home() {
     ? 'Nothing in the stash yet'
     : `${inStockCount} strain${inStockCount !== 1 ? 's' : ''}${totalWeight > 0 ? ` · ${totalWeight}g` : ''}${lastUpdated ? ` · updated ${lastUpdated}` : ''}`
 
-  const cards = [
+  const allCards = [
     {
       to: '/journal',
       label: 'The Stashbox',
@@ -124,6 +137,8 @@ function Home() {
     },
   ]
 
+  const cards = cardOrder.map(to => allCards.find(c => c.to === to)!).filter(Boolean)
+
   function startLongPress(action?: () => void) {
     if (!action) return
     longPressRef.current = setTimeout(() => action(), 600)
@@ -138,6 +153,13 @@ function Home() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+
+      {showOnboarding && (
+        <Onboarding onDone={() => {
+          localStorage.setItem('dg_onboarded', '1')
+          setShowOnboarding(false)
+        }} />
+      )}
 
       {/* Header */}
       <div style={{ textAlign: 'center', padding: '36px 16px 0' }}>
