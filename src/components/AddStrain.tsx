@@ -315,7 +315,7 @@ export default function AddStrain({ onClose }: Props) {
               }}
             >
               <Search size={14} strokeWidth={2} />
-              {lookingUp ? '…' : 'Look up'}
+              {lookingUp ? <DiamondSpinner size={32} /> : 'Look up'}
             </button>
           </div>
 

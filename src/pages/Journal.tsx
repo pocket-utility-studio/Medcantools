@@ -8,6 +8,7 @@ import StrainSearch from '../components/StrainSearch'
 import PageHeader from '../components/PageHeader'
 import BudSprite from '../components/BudSprite'
 import StrainMixer from '../components/StrainMixer'
+import DiamondSpinner from '../components/DiamondSpinner'
 
 export default function Journal() {
   const navigate = useNavigate()
@@ -21,7 +22,7 @@ export default function Journal() {
     if (searchParams.get('add') === '1') setAdding(true)
   }, [])
 
-  if (loading) return <p style={{ color: 'var(--text-muted)', fontSize: 14, padding: 16 }}>Loading...</p>
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><DiamondSpinner size={80} /></div>
 
   if (adding) return <AddStrain onClose={() => setAdding(false)} />
   if (searching) return <StrainSearch onClose={() => setSearching(false)} />

@@ -3,6 +3,7 @@ import { Sparkles, ClipboardList, Pencil } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStash, type StrainEntry } from '../context/StashContext'
 import { lookupStrainData } from '../services/ai'
+import DiamondSpinner from './DiamondSpinner'
 import PageHeader from './PageHeader'
 
 interface Props {
@@ -376,7 +377,7 @@ export default function StrainDetail({ strain, onClose }: Props) {
         }}
       >
         <Sparkles size={15} strokeWidth={2} />
-        {enriching ? 'Looking up…' : enriched ? 'Info filled in ✓' : 'Fill missing info with AI'}
+        {enriching ? <DiamondSpinner size={40} /> : enriched ? 'Info filled in ✓' : 'Fill missing info with AI'}
       </button>
 
       {/* Notes */}
