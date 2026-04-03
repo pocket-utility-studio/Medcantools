@@ -305,7 +305,7 @@ let _strainDb: StrainRecord[] | null = null
 async function getStrainDb(): Promise<StrainRecord[]> {
   if (_strainDb) return _strainDb
   try {
-    const res = await fetch('/Medcantools/strains.json')
+    const res = await fetch('/Daily-Grind/strains.json')
     _strainDb = await res.json()
   } catch {
     _strainDb = []

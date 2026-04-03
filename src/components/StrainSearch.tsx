@@ -30,7 +30,7 @@ const TYPE_COLOR: Record<string, string> = {
 let _db: StrainRecord[] | null = null
 async function fetchDb(): Promise<StrainRecord[]> {
   if (_db) return _db
-  try { _db = await fetch('/Medcantools/strains.json').then(r => r.json()) } catch { _db = [] }
+  try { _db = await fetch('/Daily-Grind/strains.json').then(r => r.json()) } catch { _db = [] }
   return _db!
 }
 

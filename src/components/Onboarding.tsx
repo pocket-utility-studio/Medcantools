@@ -94,7 +94,7 @@ export default function Onboarding({ onDone }: Props) {
               <s.Icon size={26} color={s.color} strokeWidth={2} />
             </div>
           ) : (
-            <img src="/Medcantools/icon.png" alt="" style={{ width: 72, height: 72, objectFit: 'contain' }} />
+            <img src="/Daily-Grind/icon.png" alt="" style={{ width: 72, height: 72, objectFit: 'contain' }} />
           )}
         </div>
 

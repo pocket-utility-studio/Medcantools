@@ -7,6 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
+import { getImage, setImage, deleteImages, strainImageKey } from '../services/imageStore'
 
 export interface StrainEntry {
   id: string
@@ -36,42 +37,6 @@ const LEGACY_KEY  = 'canopy_stash'
 const BACKUP_KEYS = ['dailygrind_bk_1', 'dailygrind_bk_2', 'dailygrind_bk_3'] as const
 const BACKUP_INTERVAL_MS = 5 * 60 * 1000 // rotate backups at most every 5 minutes
 
-const SEED_STRAINS: StrainEntry[] = [
-  {
-    id: '1',
-    name: 'Blue Dream',
-    thc: 21,
-    cbd: 0.5,
-    type: 'sativa',
-    inStock: true,
-    amount: '3.5g',
-    dateAdded: '2026-01-15T10:00:00Z',
-    notes: 'Uplifting and creative',
-  },
-  {
-    id: '2',
-    name: 'Northern Lights',
-    thc: 18,
-    cbd: 1,
-    type: 'indica',
-    inStock: true,
-    amount: '2g',
-    dateAdded: '2026-01-20T10:00:00Z',
-    notes: 'Good for sleep',
-  },
-  {
-    id: '3',
-    name: 'Jack Herer',
-    thc: 23,
-    cbd: 0.3,
-    type: 'sativa',
-    inStock: false,
-    amount: '0g',
-    dateAdded: '2026-01-10T10:00:00Z',
-    notes: 'Focused and clear',
-  },
-]
-
 // ── Other storage keys backed up alongside strains ────────────────────────────
 
 const FULL_BACKUP_KEY = 'dailygrind_full_backup'
@@ -97,7 +62,7 @@ export function restoreFullBackup(): boolean {
   const bk = readFullBackup()
   if (!bk) return false
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(bk.strains))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stripImages(bk.strains)))
     if (Array.isArray(bk.sessions)) localStorage.setItem('dailygrind_sessions', JSON.stringify(bk.sessions))
     if (Array.isArray(bk.savedRecs)) localStorage.setItem('dg_saved_recs', JSON.stringify(bk.savedRecs))
     return true
@@ -109,12 +74,29 @@ function writeFullBackup(strains: StrainEntry[]): void {
     const sessions = JSON.parse(localStorage.getItem('dailygrind_sessions') || '[]')
     const savedRecs = JSON.parse(localStorage.getItem('dg_saved_recs') || '[]')
     localStorage.setItem(FULL_BACKUP_KEY, JSON.stringify({
-      strains,
+      strains: stripImages(strains),
       sessions,
       savedRecs,
       savedAt: new Date().toISOString(),
     }))
   } catch { /* storage full — skip */ }
+}
+
+// ── Image helpers ─────────────────────────────────────────────────────────────
+
+function stripImages(strains: StrainEntry[]): StrainEntry[] {
+  return strains.map(({ imageDataUrl: _i, budImageDataUrl: _b, ...rest }) => rest)
+}
+
+async function hydrateImages(strains: StrainEntry[]): Promise<StrainEntry[]> {
+  return Promise.all(strains.map(async (s) => {
+    const [packaging, bud] = await Promise.all([
+      getImage(strainImageKey(s.id, 'packaging')),
+      getImage(strainImageKey(s.id, 'bud')),
+    ])
+    if (!packaging && !bud) return s
+    return { ...s, imageDataUrl: packaging, budImageDataUrl: bud }
+  }))
 }
 
 // ── Serialisation helpers ──────────────────────────────────────────────────────
@@ -124,7 +106,7 @@ function parseStrains(raw: string): StrainEntry[] | null {
     const parsed = JSON.parse(raw)
     // Handle bare array or wrapped export format
     const arr = Array.isArray(parsed) ? parsed : parsed?.strains
-    if (Array.isArray(arr) && arr.length > 0) return arr as StrainEntry[]
+    if (Array.isArray(arr)) return arr as StrainEntry[]
   } catch {
     // fall through
   }
@@ -165,7 +147,7 @@ function rotateBackups(strains: StrainEntry[]): void {
   }
   try {
     localStorage.setItem(BACKUP_KEYS[0], JSON.stringify({
-      strains,
+      strains: stripImages(strains),
       savedAt: new Date().toISOString(),
     }))
   } catch {
@@ -185,7 +167,7 @@ export function restoreBackupToStorage(index: number): StrainEntry[] | null {
   const bk = readBackup(BACKUP_KEYS[index])
   if (!bk) return null
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(bk.strains))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stripImages(bk.strains)))
   } catch {
     // ignore
   }
@@ -194,13 +176,33 @@ export function restoreBackupToStorage(index: number): StrainEntry[] | null {
 
 // ── Load / save ────────────────────────────────────────────────────────────────
 
-function loadStrains(): { strains: StrainEntry[]; restoredFromBackup?: number } {
+interface LoadResult {
+  strains: StrainEntry[]
+  imagesToMigrate: Array<{ id: string; packaging?: string; bud?: string }>
+  restoredFromBackup?: number
+}
+
+function loadStrains(): LoadResult {
+  const migrate = (strains: StrainEntry[]) => {
+    const imagesToMigrate: Array<{ id: string; packaging?: string; bud?: string }> = []
+    const stripped = strains.map((s) => {
+      if (s.imageDataUrl || s.budImageDataUrl) {
+        imagesToMigrate.push({ id: s.id, packaging: s.imageDataUrl, bud: s.budImageDataUrl })
+      }
+      return { ...s, imageDataUrl: undefined, budImageDataUrl: undefined }
+    })
+    return { stripped, imagesToMigrate }
+  }
+
   // Try primary
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = parseStrains(raw)
-      if (parsed) return { strains: parsed }
+      if (parsed !== null) {
+        const { stripped, imagesToMigrate } = migrate(parsed)
+        return { strains: stripped, imagesToMigrate }
+      }
     }
   } catch { /* corrupt, fall through */ }
 
@@ -208,9 +210,9 @@ function loadStrains(): { strains: StrainEntry[]; restoredFromBackup?: number } 
   for (let i = 0; i < BACKUP_KEYS.length; i++) {
     const bk = readBackup(BACKUP_KEYS[i])
     if (bk) {
-      // Silently restore primary from backup
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bk.strains)) } catch { /* ignore */ }
-      return { strains: bk.strains, restoredFromBackup: i }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stripImages(bk.strains))) } catch { /* ignore */ }
+      const { stripped, imagesToMigrate } = migrate(bk.strains)
+      return { strains: stripped, imagesToMigrate, restoredFromBackup: i }
     }
   }
 
@@ -219,20 +221,21 @@ function loadStrains(): { strains: StrainEntry[]; restoredFromBackup?: number } 
     const legacy = localStorage.getItem(LEGACY_KEY)
     if (legacy) {
       const parsed = parseStrains(legacy)
-      if (parsed) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)) } catch { /* ignore */ }
+      if (parsed !== null) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stripImages(parsed))) } catch { /* ignore */ }
         try { localStorage.removeItem(LEGACY_KEY) } catch { /* ignore */ }
-        return { strains: parsed }
+        const { stripped, imagesToMigrate } = migrate(parsed)
+        return { strains: stripped, imagesToMigrate }
       }
     }
   } catch { /* ignore */ }
 
-  return { strains: SEED_STRAINS }
+  return { strains: [], imagesToMigrate: [] }
 }
 
 function savePrimary(strains: StrainEntry[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(strains))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stripImages(strains)))
   } catch {
     // ignore
   }
@@ -264,17 +267,27 @@ export function StashProvider({ children }: { children: ReactNode }) {
   const lastBackupRef = useRef<number>(0)
 
   useEffect(() => {
-    const { strains: loaded, restoredFromBackup: idx } = loadStrains()
+    const { strains: loaded, imagesToMigrate, restoredFromBackup: idx } = loadStrains()
     setStrains(loaded)
     savePrimary(loaded)
     if (idx !== undefined) setRestoredFromBackup(idx)
     setLoading(false)
+
+    // Migrate any images still embedded in localStorage → IndexedDB
+    if (imagesToMigrate.length > 0) {
+      Promise.all(imagesToMigrate.map(async ({ id, packaging, bud }) => {
+        if (packaging) await setImage(strainImageKey(id, 'packaging'), packaging)
+        if (bud) await setImage(strainImageKey(id, 'bud'), bud)
+      })).catch(() => {})
+    }
+
+    // Hydrate images from IndexedDB into state
+    hydrateImages(loaded).then(setStrains).catch(() => {})
   }, [])
 
   useEffect(() => {
     if (loading) return
     savePrimary(strains)
-    // Rotate backups on a throttled basis
     const now = Date.now()
     if (now - lastBackupRef.current >= BACKUP_INTERVAL_MS) {
       rotateBackups(strains)
@@ -288,14 +301,12 @@ export function StashProvider({ children }: { children: ReactNode }) {
     if (loading) return
     const handleUnload = () => {
       savePrimary(strains)
-      // Strain-only rolling backup
       try {
         localStorage.setItem(BACKUP_KEYS[0], JSON.stringify({
-          strains,
+          strains: stripImages(strains),
           savedAt: new Date().toISOString(),
         }))
       } catch { /* ignore */ }
-      // Full backup (strains + sessions + saved recs)
       writeFullBackup(strains)
     }
     window.addEventListener('beforeunload', handleUnload)
@@ -307,17 +318,36 @@ export function StashProvider({ children }: { children: ReactNode }) {
   }, [strains, loading])
 
   const addStrain = useCallback((entry: Omit<StrainEntry, 'id' | 'dateAdded'>) => {
+    const id = crypto.randomUUID()
+    const { imageDataUrl, budImageDataUrl, ...rest } = entry
+    if (imageDataUrl) setImage(strainImageKey(id, 'packaging'), imageDataUrl).catch(() => {})
+    if (budImageDataUrl) setImage(strainImageKey(id, 'bud'), budImageDataUrl).catch(() => {})
     setStrains((prev) => [
       ...prev,
-      { ...entry, id: crypto.randomUUID(), dateAdded: new Date().toISOString() },
+      { ...rest, imageDataUrl, budImageDataUrl, id, dateAdded: new Date().toISOString() },
     ])
   }, [])
 
   const updateStrain = useCallback((id: string, updates: Partial<Omit<StrainEntry, 'id'>>) => {
+    if ('imageDataUrl' in updates) {
+      if (updates.imageDataUrl) {
+        setImage(strainImageKey(id, 'packaging'), updates.imageDataUrl).catch(() => {})
+      } else {
+        deleteImages([strainImageKey(id, 'packaging')]).catch(() => {})
+      }
+    }
+    if ('budImageDataUrl' in updates) {
+      if (updates.budImageDataUrl) {
+        setImage(strainImageKey(id, 'bud'), updates.budImageDataUrl).catch(() => {})
+      } else {
+        deleteImages([strainImageKey(id, 'bud')]).catch(() => {})
+      }
+    }
     setStrains((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)))
   }, [])
 
   const deleteStrain = useCallback((id: string) => {
+    deleteImages([strainImageKey(id, 'packaging'), strainImageKey(id, 'bud')]).catch(() => {})
     setStrains((prev) => prev.filter((s) => s.id !== id))
   }, [])
 

@@ -2,8 +2,19 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { useStash, readBackupMeta, restoreBackupToStorage, readFullBackup, restoreFullBackup } from '../context/StashContext'
+import { clearImageDB } from '../services/imageStore'
 import { loadCardOrder } from '../App'
 import PageHeader from '../components/PageHeader'
+
+function getLocalStorageUsageKB(): number {
+  try {
+    let total = 0
+    for (const key of Object.keys(localStorage)) {
+      total += (localStorage.getItem(key) ?? '').length * 2
+    }
+    return Math.round(total / 1024)
+  } catch { return 0 }
+}
 
 const CARD_LABELS: Record<string, string> = {
   '/journal':   'The Stashbox',
@@ -39,6 +50,8 @@ export default function Settings() {
   const [backups] = useState(() => readBackupMeta())
   const [restoringBackup, setRestoringBackup] = useState<number | null>(null)
   const [fullBackup] = useState(() => readFullBackup())
+  const [storageKB] = useState(() => getLocalStorageUsageKB())
+  const storagePct = Math.min(100, Math.round((storageKB / 5120) * 100))
 
   function saveKey() {
     if (apiKey.trim()) {
@@ -156,6 +169,7 @@ export default function Settings() {
 
   function clearData() {
     localStorage.removeItem('dailygrind_stash')
+    clearImageDB()
     window.location.reload()
   }
 
@@ -269,6 +283,33 @@ export default function Settings() {
       {/* Data */}
       <section style={{ marginBottom: 32 }}>
         <span style={sectionLabel}>Data</span>
+
+        {/* Storage usage */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 12, color: storagePct >= 80 ? '#c05000' : 'var(--text-muted)' }}>
+              Storage: {storageKB} KB / 5120 KB
+            </span>
+            <span style={{ fontSize: 12, color: storagePct >= 80 ? '#c05000' : 'var(--text-dim)' }}>
+              {storagePct}%
+            </span>
+          </div>
+          <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%',
+              width: `${storagePct}%`,
+              background: storagePct >= 80 ? '#c05000' : 'var(--accent)',
+              borderRadius: 3,
+              transition: 'width 0.3s',
+            }} />
+          </div>
+          {storagePct >= 80 && (
+            <p style={{ fontSize: 12, color: '#c05000', margin: '6px 0 0', lineHeight: 1.4 }}>
+              Storage is nearly full. Export a backup and consider clearing old data.
+            </p>
+          )}
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button
             onClick={exportData}

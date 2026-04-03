@@ -6,7 +6,7 @@ import { StashProvider } from './context/StashContext.tsx'
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(`/Medcantools/sw.js?v=${__APP_VERSION__}`).catch(() => { /* ignore */ })
+    navigator.serviceWorker.register(`/Daily-Grind/sw.js?v=${__APP_VERSION__}`).catch(() => { /* ignore */ })
   })
 }
 

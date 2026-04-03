@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
+import { getImage, sessionImageKey } from '../services/imageStore'
 
 interface SessionEntry {
   id: string
@@ -29,8 +31,15 @@ export default function StrainSessions() {
   const [params] = useSearchParams()
   const strainName = params.get('strain') ?? ''
 
-  const all = loadSessions()
-  const sessions = all.filter(s => s.strainName.toLowerCase() === strainName.toLowerCase())
+  const raw = loadSessions().filter(s => s.strainName.toLowerCase() === strainName.toLowerCase())
+  const [sessions, setSessions] = useState<SessionEntry[]>(raw)
+
+  useEffect(() => {
+    Promise.all(raw.map(async (s) => {
+      const img = await getImage(sessionImageKey(s.id))
+      return img ? { ...s, imageDataUrl: img } : s
+    })).then(setSessions).catch(() => {})
+  }, [])
 
   const avgSeverity = sessions.length > 0
     ? (sessions.reduce((sum, s) => sum + s.preSeverity, 0) / sessions.length).toFixed(1)

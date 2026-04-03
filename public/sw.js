@@ -2,10 +2,10 @@ const VERSION = new URL(self.location.href).searchParams.get('v') || 'dev'
 const CACHE = `dailygrind-${VERSION}`
 
 const APP_SHELL = [
-  '/Medcantools/',
-  '/Medcantools/index.html',
-  '/Medcantools/manifest.json',
-  '/Medcantools/icon.png',
+  '/Daily-Grind/',
+  '/Daily-Grind/index.html',
+  '/Daily-Grind/manifest.json',
+  '/Daily-Grind/icon.png',
 ]
 
 self.addEventListener('install', (e) => {
@@ -41,7 +41,7 @@ self.addEventListener('fetch', (e) => {
       }).catch(() => {
         // Offline fallback: serve the app shell
         if (e.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/Medcantools/')
+          return caches.match('/Daily-Grind/')
         }
       })
     })

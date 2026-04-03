@@ -140,10 +140,10 @@ function StrainRow({ strain, onTap }: { strain: StrainEntry; onTap: () => void }
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 3 }}>
           {strain.name}
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: strain.history ? 5 : 0 }}>
           {strain.type && (
             <span style={{
               fontSize: 10, letterSpacing: '0.07em', textTransform: 'uppercase',
@@ -159,6 +159,15 @@ function StrainRow({ strain, onTap }: { strain: StrainEntry; onTap: () => void }
             <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>CBD {strain.cbd}%</span>
           )}
         </div>
+        {strain.history && (
+          <p style={{
+            fontSize: 11, color: 'var(--text-muted)', margin: 0, lineHeight: 1.45,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {strain.history}
+          </p>
+        )}
       </div>
       <BudSprite
         name={strain.name}

@@ -4,7 +4,7 @@
  */
 
 function budImageUrl(n: number): string {
-  return n === 1 ? '/Medcantools/Bud1.png' : `/Medcantools/bud${n}.png`
+  return n === 1 ? '/Daily-Grind/Bud1.png' : `/Daily-Grind/bud${n}.png`
 }
 
 const DESIGN_TO_IMAGE: Record<string, number> = {

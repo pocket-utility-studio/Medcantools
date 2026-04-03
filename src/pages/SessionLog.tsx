@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Camera } from 'lucide-react'
 import { useStash } from '../context/StashContext'
 import PageHeader from '../components/PageHeader'
+import { getImage, setImage, deleteImage, sessionImageKey } from '../services/imageStore'
 
 interface SessionEntry {
   id: string
@@ -37,13 +38,23 @@ function loadSessions(): SessionEntry[] {
 }
 
 function saveSessions(sessions: SessionEntry[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions))
+  const stripped = sessions.map(({ imageDataUrl: _, ...rest }) => rest)
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped)) } catch { /* ignore */ }
 }
 
 export default function SessionLog() {
   const navigate = useNavigate()
   const { strains } = useStash()
   const [sessions, setSessions] = useState<SessionEntry[]>(loadSessions)
+
+  // Hydrate images from IndexedDB after mount
+  useEffect(() => {
+    const raw = loadSessions()
+    Promise.all(raw.map(async (s) => {
+      const img = await getImage(sessionImageKey(s.id))
+      return img ? { ...s, imageDataUrl: img } : s
+    })).then(setSessions).catch(() => {})
+  }, [])
   const [adding, setAdding] = useState(false)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -80,8 +91,10 @@ export default function SessionLog() {
 
   function logSession() {
     if (!strainName.trim()) return
+    const id = crypto.randomUUID()
+    if (imageDataUrl) setImage(sessionImageKey(id), imageDataUrl).catch(() => {})
     const entry: SessionEntry = {
-      id: crypto.randomUUID(),
+      id,
       strainName: strainName.trim(),
       strainType: strainType || undefined,
       date: new Date().toISOString(),
@@ -90,7 +103,7 @@ export default function SessionLog() {
       preSeverity,
       mood: mood || undefined,
       notes: notes || undefined,
-      imageDataUrl,
+      imageDataUrl, // kept in memory state only
     }
     const updated = [entry, ...sessions]
     setSessions(updated)
@@ -103,6 +116,7 @@ export default function SessionLog() {
   }
 
   function deleteSession(id: string) {
+    deleteImage(sessionImageKey(id)).catch(() => {})
     const updated = sessions.filter((s) => s.id !== id)
     setSessions(updated)
     saveSessions(updated)

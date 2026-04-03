@@ -13,7 +13,7 @@ interface StrainRecord { Strain: string }
 let _db: StrainRecord[] | null = null
 async function fetchDb(): Promise<StrainRecord[]> {
   if (_db) return _db
-  try { _db = await fetch('/Medcantools/strains.json').then(r => r.json()) } catch { _db = [] }
+  try { _db = await fetch('/Daily-Grind/strains.json').then(r => r.json()) } catch { _db = [] }
   return _db!
 }
 
@@ -38,6 +38,8 @@ export default function AddStrain({ onClose }: Props) {
   const [inStock, setInStock] = useState(true)
   const [imageDataUrl, setImageDataUrl] = useState<string | undefined>()
   const [budImageDataUrl, setBudImageDataUrl] = useState<string | undefined>()
+
+  const [history, setHistory] = useState('')
 
   const [lookingUp, setLookingUp] = useState(false)
   const [scanning, setScanning] = useState(false)
@@ -96,6 +98,7 @@ export default function AddStrain({ onClose }: Props) {
       if (data.type)         setType(data.type)
       if (data.terpenes)     setTerpenes(data.terpenes)
       if (data.effects)      setEffects(data.effects)
+      if (data.history)      setHistory(data.history)
     } catch {
       setError('Lookup failed. Check your API key in Settings.')
     } finally {
@@ -143,6 +146,7 @@ export default function AddStrain({ onClose }: Props) {
             if (ai.type         && !data.type)       setType(ai.type)
             if (ai.terpenes)                         setTerpenes(ai.terpenes)
             if (ai.effects)                          setEffects(ai.effects)
+            if (ai.history)                          setHistory(ai.history)
             setScanEnriched(true)
           } catch { /* enrichment is best-effort, ignore failures */ }
         }
@@ -194,6 +198,7 @@ export default function AddStrain({ onClose }: Props) {
       inStock,
       imageDataUrl,
       budImageDataUrl,
+      history: history || undefined,
     })
     onClose()
   }
@@ -273,7 +278,23 @@ export default function AddStrain({ onClose }: Props) {
       ) : (
         <div style={{ position: 'relative', marginBottom: 20 }}>
           <img src={imageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 180, objectFit: 'cover', display: 'block' }} />
-          {scanDone && (
+
+          {/* Loading overlay while AI processes */}
+          {scanning && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(0,0,0,0.6)', borderRadius: 12,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 10,
+            }}>
+              <DiamondSpinner size={52} />
+              <span style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>
+                {scanDone ? 'Getting AI details…' : 'Reading label…'}
+              </span>
+            </div>
+          )}
+
+          {!scanning && scanDone && (
             <div style={{
               position: 'absolute', top: 10, left: 10,
               background: 'var(--accent)', borderRadius: 20,
