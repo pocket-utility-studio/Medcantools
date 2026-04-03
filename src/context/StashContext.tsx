@@ -16,6 +16,7 @@ export interface StrainEntry {
   type?: 'sativa' | 'indica' | 'hybrid'
   notes?: string
   imageDataUrl?: string
+  budImageDataUrl?: string
   dateAdded: string
   inStock: boolean
   amount?: string

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Camera, Search, Check, X } from 'lucide-react'
+import { Camera, ImagePlus, Search, Check, X } from 'lucide-react'
 import { useStash } from '../context/StashContext'
 import { lookupStrainData, parseStrainFromImage } from '../services/ai'
 import PageHeader from './PageHeader'
@@ -24,6 +24,7 @@ function formatName(raw: string): string {
 export default function AddStrain({ onClose }: Props) {
   const { addStrain } = useStash()
   const fileRef = useRef<HTMLInputElement>(null)
+  const budFileRef = useRef<HTMLInputElement>(null)
   const suggestRef = useRef<HTMLDivElement>(null)
 
   const [name, setName] = useState('')
@@ -36,6 +37,7 @@ export default function AddStrain({ onClose }: Props) {
   const [notes, setNotes] = useState('')
   const [inStock, setInStock] = useState(true)
   const [imageDataUrl, setImageDataUrl] = useState<string | undefined>()
+  const [budImageDataUrl, setBudImageDataUrl] = useState<string | undefined>()
 
   const [lookingUp, setLookingUp] = useState(false)
   const [scanning, setScanning] = useState(false)
@@ -162,6 +164,22 @@ export default function AddStrain({ onClose }: Props) {
     if (fileRef.current) fileRef.current.value = ''
   }
 
+  function handleBudPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setBudImageDataUrl(ev.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+    if (budFileRef.current) budFileRef.current.value = ''
+  }
+
+  function clearBudImage() {
+    setBudImageDataUrl(undefined)
+    if (budFileRef.current) budFileRef.current.value = ''
+  }
+
   function handleSave() {
     if (!name.trim()) return
     addStrain({
@@ -175,6 +193,7 @@ export default function AddStrain({ onClose }: Props) {
       notes: notes || undefined,
       inStock,
       imageDataUrl,
+      budImageDataUrl,
     })
     onClose()
   }
@@ -203,13 +222,21 @@ export default function AddStrain({ onClose }: Props) {
     <div style={{ padding: '20px 16px 40px' }}>
       <PageHeader title="Add Strain" onBack={onClose} />
 
-      {/* Camera scan */}
+      {/* Camera scan (packaging label) */}
       <input
         ref={fileRef}
         type="file"
         accept="image/*"
         capture="environment"
         onChange={handleScan}
+        style={{ display: 'none' }}
+      />
+      {/* Bud photo (gallery pick) */}
+      <input
+        ref={budFileRef}
+        type="file"
+        accept="image/*"
+        onChange={handleBudPhoto}
         style={{ display: 'none' }}
       />
 
@@ -272,6 +299,62 @@ export default function AddStrain({ onClose }: Props) {
           </button>
         </div>
       )}
+
+      {/* Bud photo */}
+      <div style={{ marginBottom: 20 }}>
+        <label style={labelStyle}>Bud photo</label>
+        {!budImageDataUrl ? (
+          <button
+            onClick={() => budFileRef.current?.click()}
+            style={{
+              width: '100%',
+              background: 'var(--surface)',
+              border: '2px dashed var(--border)',
+              borderRadius: 14,
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              minHeight: 80,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            <ImagePlus size={24} strokeWidth={1.5} />
+            <span style={{ fontSize: 13 }}>Add bud photo</span>
+          </button>
+        ) : (
+          <div style={{ position: 'relative' }}>
+            <img src={budImageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 180, objectFit: 'cover', display: 'block' }} />
+            <button
+              onClick={clearBudImage}
+              style={{
+                position: 'absolute', top: 10, right: 10,
+                background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%',
+                width: 32, height: 32, minHeight: 32,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <X size={14} strokeWidth={2.5} color="#fff" />
+            </button>
+            <button
+              onClick={() => budFileRef.current?.click()}
+              style={{
+                position: 'absolute', top: 10, left: 10,
+                background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 20,
+                padding: '4px 10px',
+                display: 'flex', alignItems: 'center', gap: 5,
+                cursor: 'pointer',
+              }}
+            >
+              <ImagePlus size={12} color="#fff" />
+              <span style={{ fontSize: 11, color: '#fff', fontWeight: 600 }}>Change</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {error && (
         <div style={{

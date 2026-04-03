@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Sparkles, ClipboardList, Pencil } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Sparkles, ClipboardList, Pencil, ImagePlus, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStash, type StrainEntry } from '../context/StashContext'
 import { lookupStrainData, crossCheckStrainWithClaude, judgeStrainData, type CrossCheckResult, type StrainJudgment } from '../services/ai'
@@ -52,6 +52,10 @@ export default function StrainDetail({ strain, onClose }: Props) {
   const [editEffects, setEditEffects] = useState(strain.effects ?? '')
   const [editAmount, setEditAmount] = useState(strain.amount ?? '')
   const [editNotes, setEditNotes] = useState(strain.notes ?? '')
+  const [editImageDataUrl, setEditImageDataUrl] = useState<string | undefined>(strain.imageDataUrl)
+  const [editBudImageDataUrl, setEditBudImageDataUrl] = useState<string | undefined>(strain.budImageDataUrl)
+  const packagingFileRef = useRef<HTMLInputElement>(null)
+  const budFileRef = useRef<HTMLInputElement>(null)
 
   function startEdit() {
     setEditName(strain.name)
@@ -62,7 +66,18 @@ export default function StrainDetail({ strain, onClose }: Props) {
     setEditEffects(strain.effects ?? '')
     setEditAmount(strain.amount ?? '')
     setEditNotes(strain.notes ?? '')
+    setEditImageDataUrl(strain.imageDataUrl)
+    setEditBudImageDataUrl(strain.budImageDataUrl)
     setEditing(true)
+  }
+
+  function handleEditPhoto(e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setter(ev.target?.result as string)
+    reader.readAsDataURL(file)
+    e.target.value = ''
   }
 
   function saveEdit() {
@@ -76,6 +91,8 @@ export default function StrainDetail({ strain, onClose }: Props) {
       effects: editEffects || undefined,
       amount: editAmount || undefined,
       notes: editNotes || undefined,
+      imageDataUrl: editImageDataUrl,
+      budImageDataUrl: editBudImageDataUrl,
     })
     setEditing(false)
   }
@@ -216,7 +233,7 @@ export default function StrainDetail({ strain, onClose }: Props) {
           <input value={editEffects} onChange={e => setEditEffects(e.target.value)} placeholder="e.g. Relaxed, Happy" style={inputStyle} />
         </div>
 
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 14 }}>
           <label style={labelStyle}>Notes</label>
           <textarea
             value={editNotes}
@@ -224,6 +241,70 @@ export default function StrainDetail({ strain, onClose }: Props) {
             rows={3}
             style={{ ...inputStyle, resize: 'none', lineHeight: 1.6 }}
           />
+        </div>
+
+        {/* Packaging photo */}
+        <input ref={packagingFileRef} type="file" accept="image/*" onChange={e => handleEditPhoto(e, setEditImageDataUrl)} style={{ display: 'none' }} />
+        <div style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>Packaging photo</label>
+          {editImageDataUrl ? (
+            <div style={{ position: 'relative' }}>
+              <img src={editImageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 160, objectFit: 'cover', display: 'block' }} />
+              <button
+                onClick={() => packagingFileRef.current?.click()}
+                style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 20, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}
+              >
+                <ImagePlus size={12} color="#fff" />
+                <span style={{ fontSize: 11, color: '#fff', fontWeight: 600 }}>Change</span>
+              </button>
+              <button
+                onClick={() => setEditImageDataUrl(undefined)}
+                style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: 32, height: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              >
+                <X size={14} strokeWidth={2.5} color="#fff" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => packagingFileRef.current?.click()}
+              style={{ width: '100%', background: 'var(--surface)', border: '2px dashed var(--border)', borderRadius: 14, color: 'var(--text-muted)', cursor: 'pointer', minHeight: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            >
+              <ImagePlus size={20} strokeWidth={1.5} />
+              <span style={{ fontSize: 13 }}>Add packaging photo</span>
+            </button>
+          )}
+        </div>
+
+        {/* Bud photo */}
+        <input ref={budFileRef} type="file" accept="image/*" onChange={e => handleEditPhoto(e, setEditBudImageDataUrl)} style={{ display: 'none' }} />
+        <div style={{ marginBottom: 24 }}>
+          <label style={labelStyle}>Bud photo</label>
+          {editBudImageDataUrl ? (
+            <div style={{ position: 'relative' }}>
+              <img src={editBudImageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 160, objectFit: 'cover', display: 'block' }} />
+              <button
+                onClick={() => budFileRef.current?.click()}
+                style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 20, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}
+              >
+                <ImagePlus size={12} color="#fff" />
+                <span style={{ fontSize: 11, color: '#fff', fontWeight: 600 }}>Change</span>
+              </button>
+              <button
+                onClick={() => setEditBudImageDataUrl(undefined)}
+                style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: 32, height: 32, minHeight: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              >
+                <X size={14} strokeWidth={2.5} color="#fff" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => budFileRef.current?.click()}
+              style={{ width: '100%', background: 'var(--surface)', border: '2px dashed var(--border)', borderRadius: 14, color: 'var(--text-muted)', cursor: 'pointer', minHeight: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            >
+              <ImagePlus size={20} strokeWidth={1.5} />
+              <span style={{ fontSize: 13 }}>Add bud photo</span>
+            </button>
+          )}
         </div>
 
         <button
@@ -290,17 +371,31 @@ export default function StrainDetail({ strain, onClose }: Props) {
         </div>
       )}
 
-      {/* Scan image */}
-      {strain.imageDataUrl && (
-        <img
-          src={strain.imageDataUrl}
-          alt=""
-          style={{
-            width: '100%', borderRadius: 12, marginBottom: 16,
-            maxHeight: 180, objectFit: 'cover',
-            border: '2px solid var(--border)',
-          }}
-        />
+      {/* Photos */}
+      {(strain.imageDataUrl || strain.budImageDataUrl) && (
+        <div style={{
+          display: strain.imageDataUrl && strain.budImageDataUrl ? 'grid' : 'block',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 10,
+          marginBottom: 16,
+        }}>
+          {strain.imageDataUrl && (
+            <div>
+              {strain.budImageDataUrl && (
+                <p style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6, marginTop: 0 }}>Packaging</p>
+              )}
+              <img src={strain.imageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 160, objectFit: 'cover', display: 'block', border: '2px solid var(--border)' }} />
+            </div>
+          )}
+          {strain.budImageDataUrl && (
+            <div>
+              {strain.imageDataUrl && (
+                <p style={{ fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6, marginTop: 0 }}>Bud</p>
+              )}
+              <img src={strain.budImageDataUrl} alt="" style={{ width: '100%', borderRadius: 12, maxHeight: 160, objectFit: 'cover', display: 'block', border: '2px solid var(--border)' }} />
+            </div>
+          )}
+        </div>
       )}
 
       {/* Stats card */}
