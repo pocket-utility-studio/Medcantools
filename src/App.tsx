@@ -370,7 +370,7 @@ function Home() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/Medcantools">
+    <BrowserRouter basename="/Daily-Grind">
       <div style={{
         display: 'flex',
         flexDirection: 'column',
