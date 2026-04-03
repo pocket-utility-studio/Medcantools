@@ -1,13 +1,13 @@
 {
   "name": "Daily Grind",
   "short_name": "Daily Grind",
-  "start_url": "/Medcantools/",
+  "start_url": "/Daily-Grind/",
   "display": "standalone",
   "background_color": "#f2f0eb",
   "theme_color": "#f2f0eb",
   "icons": [
     {
-      "src": "/Medcantools/icon.png",
+      "src": "/Daily-Grind/icon.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any"
