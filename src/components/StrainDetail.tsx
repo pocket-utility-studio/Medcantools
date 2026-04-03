@@ -122,6 +122,7 @@ export default function StrainDetail({ strain, onClose }: Props) {
       if (data.type          && !strain.type)            updates.type      = data.type
       if (data.terpenes      && !strain.terpenes)        updates.terpenes  = data.terpenes
       if (data.effects       && !strain.effects)         updates.effects   = data.effects
+      if (data.medical       && !strain.medical)         updates.medical   = data.medical
       if (data.history       && !strain.history)         updates.history   = data.history
       if (Object.keys(updates).length > 0) updateStrain(strain.id, updates)
       setEnriched(true)
@@ -413,6 +414,7 @@ export default function StrainDetail({ strain, onClose }: Props) {
           strain.amount        && { label: 'Amount',   value: strain.amount },
           strain.terpenes      && { label: 'Terpenes', value: strain.terpenes },
           strain.effects       && { label: 'Effects',  value: strain.effects },
+          strain.medical       && { label: 'Medical',  value: strain.medical },
         ].filter(Boolean).map((row, i, arr) => {
           const { label, value } = row as { label: string; value: string }
           return (

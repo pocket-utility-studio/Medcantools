@@ -24,6 +24,7 @@ export interface StrainEntry {
   terpenes?: string
   effects?: string
   history?: string
+  medical?: string
 }
 
 export interface BackupMeta {

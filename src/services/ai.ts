@@ -358,6 +358,7 @@ Respond ONLY with a single valid JSON object. Use null for unknown fields except
   "type": <"sativa"|"indica"|"hybrid"|null>,
   "terpenes": <"comma-separated dominant terpenes"|null>,
   "effects": <"short comma-separated list of effects"|null>,
+  "medical": <"short comma-separated list of therapeutic or medical uses this strain is commonly associated with (e.g. pain, anxiety, insomnia, nausea)"|null>,
   "history": <"5-8 sentences covering: geographic origin or region, the era or decade it emerged, breeder or collective who created it, parent genetics, what made it significant or novel, any awards or cultural impact, and how it influenced later breeding — only include what is genuinely documented"|null>
 }`
 
@@ -369,6 +370,7 @@ Respond ONLY with a single valid JSON object. Use null for unknown fields except
   if (data.type === 'sativa' || data.type === 'indica' || data.type === 'hybrid') out.type = data.type
   if (typeof data.terpenes === 'string' && data.terpenes) out.terpenes = data.terpenes
   if (typeof data.effects  === 'string' && data.effects)  out.effects  = data.effects
+  if (typeof data.medical  === 'string' && data.medical)  out.medical  = data.medical
   if (typeof data.history  === 'string' && data.history)  out.history  = data.history
   return out
 }

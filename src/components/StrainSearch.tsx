@@ -170,6 +170,7 @@ export default function StrainSearch({ onClose }: Props) {
       type: result.type,
       terpenes: result.terpenes,
       effects: result.effects,
+      medical: result.medical,
       inStock: true,
     })
     setAdded(true)
@@ -340,6 +341,7 @@ export default function StrainSearch({ onClose }: Props) {
             result.cbd != null   && { label: 'CBD',      value: `${result.cbd}%` },
             result.terpenes      && { label: 'Terpenes', value: result.terpenes },
             result.effects       && { label: 'Effects',  value: result.effects },
+            result.medical       && { label: 'Medical',  value: result.medical },
           ].filter(Boolean).map((row, i, arr) => {
             const { label, value } = row as { label: string; value: string }
             return (
